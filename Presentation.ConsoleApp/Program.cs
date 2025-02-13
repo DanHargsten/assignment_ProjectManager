@@ -5,11 +5,12 @@ using Data.Interfaces;
 using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Presentation.ConsoleApp.Dialogs;
 using Presentation.ConsoleApp.Menus;
 
 var services = new ServiceCollection()
     .AddDbContext<DataContext>(options => options
-    .UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=E:\Projects\Databaser\ProjectManager\Data\Databases\local_database.mdf;Integrated Security=True;Connect Timeout=30"))
+    .UseSqlServer(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=E:\Projects\Databaser\ProjectManager\Data\Databases\pm_local_database.mdf;Integrated Security=True;Connect Timeout=30;Encrypt=True"))
     .AddScoped<ICustomerService, CustomerService>()
     .AddScoped<IProjectService, ProjectService>()
     .AddScoped<ICustomerRepository, CustomerRepository>()
@@ -17,6 +18,8 @@ var services = new ServiceCollection()
     .AddScoped<MainMenu>()
     .AddScoped<CustomerMenu>()
     .AddScoped<ProjectMenu>()
+    .AddScoped<CustomerDialog>()
+    .AddScoped<ProjectDialog>()
     .BuildServiceProvider();
 
 var menu = services.GetRequiredService<MainMenu>();

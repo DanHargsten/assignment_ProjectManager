@@ -13,6 +13,10 @@ public abstract class BaseRepository<TEntity>(DataContext context) : IBaseReposi
     // CREATE //
     public virtual async Task<TEntity> AddAsync(TEntity entity)
     {
+        // DEBUG //
+        Console.WriteLine($"DEBUG: Adding entity of type {typeof(TEntity).Name} with data: {Newtonsoft.Json.JsonConvert.SerializeObject(entity)}");
+        ///////////
+
         _dbSet.Add(entity);
         await _context.SaveChangesAsync();
         return entity;

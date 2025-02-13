@@ -10,7 +10,9 @@ public class ProjectRegistrationForm
 
     public DateTime StartDate { get; set; }
 
-    public DateTime EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
 
     public ProjectStatus Status { get; set; } = ProjectStatus.NotStarted;
+
+    public int CustomerId { get; set; }
 }

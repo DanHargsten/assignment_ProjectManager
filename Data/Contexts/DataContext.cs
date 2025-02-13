@@ -7,6 +7,9 @@ public class DataContext(DbContextOptions<DataContext> options) : DbContext(opti
 {
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        // DEBUG
+        optionsBuilder.LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information);
+        //
         base.OnConfiguring(optionsBuilder);
     }
 

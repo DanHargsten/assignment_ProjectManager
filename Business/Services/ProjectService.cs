@@ -1,6 +1,7 @@
 ﻿using Business.Factories;
 using Business.Interfaces;
 using Business.Models;
+using Data.Entities;
 using Data.Interfaces;
 
 namespace Business.Services;
@@ -15,17 +16,36 @@ public class ProjectService(IProjectRepository projectRepository) : IProjectServ
     {
         try
         {
+            // DEBUG //
+            Console.WriteLine($"DEBUG: Incoming Form - Title={form.Title}, Description={form.Description}, StartDate={form.StartDate}, EndDate={form.EndDate}, Status={form.Status}, CustomerId={form.CustomerId}");
+            ///////////
+
             if (form == null) return false;
 
-            var customerEntity = ProjectFactory.Create(form);
-            if (customerEntity == null) return false;
+            var projectEntity = ProjectFactory.Create(form);
+            
+            // DEBUG //
+            Console.WriteLine($"DEBUG: Created project entity with CustomerId={projectEntity.CustomerId}, Title={projectEntity.Title}, Status={projectEntity.Status}");
+            ///////////
 
-            await _projectRepository.AddAsync(customerEntity!);
+            if (projectEntity == null)
+            {
+                Console.WriteLine("DEBUG: ProjectFactory.Create() returned null!");
+                return false;
+            }
+
+            await _projectRepository.AddAsync(projectEntity!);
             return true;
         }
         catch (Exception ex)
         {
             Console.WriteLine($"Error in CreateProjectAsync: {ex.Message}");
+
+            // DEBUG
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+            }
             return false;
         }
     }
