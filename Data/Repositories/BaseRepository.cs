@@ -20,13 +20,12 @@ public abstract class BaseRepository<TEntity>(DataContext context) : IBaseReposi
 
 
     // READ //
-    // Get all
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync()
     {
         return await _dbSet.ToListAsync();
     }
 
-    // Get one
+
     public virtual async Task<TEntity?> GetOneAsync(Expression<Func<TEntity, bool>> expression)
     {
         return await _dbSet.FirstOrDefaultAsync(expression);

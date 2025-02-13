@@ -12,7 +12,7 @@ public class ProjectEntity
 
     public DateTime StartDate { get; set; }
 
-    public DateTime EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
 
 
     public ProjectStatus Status { get; set; }

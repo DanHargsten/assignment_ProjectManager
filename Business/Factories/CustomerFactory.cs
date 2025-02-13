@@ -18,6 +18,6 @@ public static class CustomerFactory
         Name = entity.Name,
         Email = entity.Email,
         PhoneNumber = entity.PhoneNumber,
-        CustomerId = entity.CustomerId
+        CustomerId = entity.Id
     };
 }

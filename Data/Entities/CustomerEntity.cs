@@ -8,7 +8,9 @@ public class CustomerEntity
 
     public string? Email { get; set; }
 
-    public string? PhoneNumber { get; set; }    
+    public string? PhoneNumber { get; set; }
 
-    public int CustomerId { get; set; }
+
+
+    public virtual ICollection<ProjectEntity> Projects { get; set; } = [];
 }

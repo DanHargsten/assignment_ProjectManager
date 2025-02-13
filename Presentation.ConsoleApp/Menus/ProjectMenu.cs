@@ -1,12 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Business.Interfaces;
 
-namespace Presentation.ConsoleApp.Menus
+namespace Presentation.ConsoleApp.Menus;
+
+public class ProjectMenu(IProjectService ProjectService, ICustomerService customerService)
 {
-    internal class ProjectMenu
+    private readonly IProjectService _projectService = ProjectService;
+    private readonly ICustomerService _customerService = customerService;
+
+    public async Task ShowProjectMenuAsync()
     {
+        Console.WriteLine("YAY");
     }
 }

@@ -12,7 +12,7 @@ public class Project
 
     public DateTime StartDate { get; set; }
 
-    public DateTime EndDate { get; set; }
+    public DateTime? EndDate { get; set; }
 
     public ProjectStatus Status { get; set; }
     public int CustomerId { get; set; }
