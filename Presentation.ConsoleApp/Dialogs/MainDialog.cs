@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace Presentation.ConsoleApp.Dialogs;
 
-namespace Presentation.ConsoleApp.Dialogs
+public class MainDialog
 {
-    internal class MainDialog
-    {
-    }
 }

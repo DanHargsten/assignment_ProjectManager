@@ -1,13 +1,13 @@
-﻿using Business.Interfaces;
-using Presentation.ConsoleApp.Dialogs;
+﻿using Presentation.ConsoleApp.Dialogs;
 
 namespace Presentation.ConsoleApp.Menus;
 
-public class ProjectMenu(IProjectService ProjectService, ICustomerService customerService, ProjectDialog projectDialog)
+/// <summary>
+/// Handles project-related menu options.
+/// </summary>
+public class ProjectMenu(CreateProjectDialog createProjectDialog)
 {
-    private readonly IProjectService _projectService = ProjectService;
-    private readonly ICustomerService _customerService = customerService;
-    private readonly ProjectDialog _projectDialog = projectDialog;
+    private readonly CreateProjectDialog _createProjectDialog = createProjectDialog;
 
     public async Task ShowProjectMenuAsync()
     {
@@ -25,7 +25,7 @@ public class ProjectMenu(IProjectService ProjectService, ICustomerService custom
             switch (option)
             {
                 case "1":
-                    await _projectDialog.CreateProjectAsync();
+                    await _createProjectDialog.ExecuteAsync();
                     break;
             }
         }

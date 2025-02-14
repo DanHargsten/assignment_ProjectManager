@@ -3,45 +3,53 @@ using Business.Interfaces;
 using Business.Models;
 using Data.Entities;
 using Data.Interfaces;
+using Data.Repositories;
 
 namespace Business.Services;
 
-public class ProjectService(IProjectRepository projectRepository) : IProjectService
+public class ProjectService(IProjectRepository projectRepository, ICustomerRepository customerRepository) : IProjectService
 {
     private readonly IProjectRepository _projectRepository = projectRepository;
+    private readonly ICustomerRepository _customerRepository = customerRepository;
 
 
-    // CREATE //
+    /// <summary>
+    /// Creates a new project and stores it in the database.
+    /// </summary>
+    /// <param name="form">The project registration form containing project details.</param>
+    /// <returns>Returns true if the project was created successfully, otherwise false.</returns>
     public async Task<bool> CreateProjectAsync(ProjectRegistrationForm form)
     {
         try
         {
-            // DEBUG //
-            Console.WriteLine($"DEBUG: Incoming Form - Title={form.Title}, Description={form.Description}, StartDate={form.StartDate}, EndDate={form.EndDate}, Status={form.Status}, CustomerId={form.CustomerId}");
-            ///////////
-
-            if (form == null) return false;
-
-            var projectEntity = ProjectFactory.Create(form);
-            
-            // DEBUG //
-            Console.WriteLine($"DEBUG: Created project entity with CustomerId={projectEntity.CustomerId}, Title={projectEntity.Title}, Status={projectEntity.Status}");
-            ///////////
-
-            if (projectEntity == null)
+            // Fetch the customer from the database to ensure it exists
+            var customer = await _customerRepository.GetOneAsync(x => x.Id == form.CustomerId);
+            if (customer == null)
             {
-                Console.WriteLine("DEBUG: ProjectFactory.Create() returned null!");
+                Console.WriteLine("Error: Selected customer does not exist.");
                 return false;
             }
 
-            await _projectRepository.AddAsync(projectEntity!);
+            // Convert the form data into a ProjectEntity
+            var projectEntity = ProjectFactory.Create(form, customer);
+
+            // Ensure the projectEntity is not null before adding it to the database
+            if (projectEntity == null)
+            {
+                Console.WriteLine("Error: Failed to create project entity.");
+                return false;
+            }
+
+            // Save the new project in the database
+            await _projectRepository.AddAsync(projectEntity);
+
             return true;
         }
         catch (Exception ex)
         {
+            // Log any errors that occur during the creation process
             Console.WriteLine($"Error in CreateProjectAsync: {ex.Message}");
-
-            // DEBUG
+    
             if (ex.InnerException != null)
             {
                 Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
@@ -154,5 +162,18 @@ public class ProjectService(IProjectRepository projectRepository) : IProjectServ
             Console.WriteLine($"Error in RemoveProjectAsync: {ex.Message}");
             return false;
         }
+    }
+
+
+
+    public async Task<List<Customer>> GetAvailableCustomersAsync()
+    {
+        var customerEntities = await _customerRepository.GetAllAsync();
+        return customerEntities.Select(c => new Customer
+        {
+            Id = c.Id,
+            Name = c.Name,
+            Email = c.Email
+        }).ToList();
     }
 }
