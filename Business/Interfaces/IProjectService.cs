@@ -9,5 +9,6 @@ namespace Business.Interfaces
         Task<IEnumerable<Project?>> GetProjectsAsync();
         Task<bool> RemoveProjectAsync(int id);
         Task<bool> UpdateProjectAsync(int id, string title, string? description, string startDate, string? endDate);
+        Task<IEnumerable<Project>> GetProjectsByCustomerIdAsync(int customerId);
     }
 }

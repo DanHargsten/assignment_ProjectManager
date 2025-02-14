@@ -16,14 +16,18 @@ public static class ProjectFactory
         Customer = customer
     };
 
-    public static Project? Create(ProjectEntity entity) => entity == null ? null : new()
+    public static Project? Create(ProjectEntity entity)
     {
-        Id = entity.Id,
-        Title = entity.Title,
-        Description = entity.Description,
-        StartDate = entity.StartDate,
-        EndDate = entity.EndDate,
-        Status = entity.Status,
-        CustomerId = entity.CustomerId
-    };
+        return entity == null ? null : new Project
+        {
+            Id = entity.Id,
+            Title = entity.Title,
+            Description = entity.Description,
+            StartDate = entity.StartDate,
+            EndDate = entity.EndDate,
+            Status = entity.Status,
+            CustomerId = entity.CustomerId,
+            CustomerName = entity.Customer?.Name ?? "Unknown"
+        };
+    }
 }

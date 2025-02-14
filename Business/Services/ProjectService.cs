@@ -1,9 +1,7 @@
 ﻿using Business.Factories;
 using Business.Interfaces;
 using Business.Models;
-using Data.Entities;
 using Data.Interfaces;
-using Data.Repositories;
 
 namespace Business.Services;
 
@@ -64,7 +62,7 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
     {
         try
         {
-            var projectEntities = await _projectRepository.GetAllAsync();
+            var projectEntities = await _projectRepository.GetAllWithCustomerAsync();
             if (!projectEntities.Any())
                 return [];
 
@@ -92,6 +90,38 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
             return null;
         }
     }
+
+
+    public async Task<IEnumerable<Project>> GetProjectsByCustomerIdAsync(int customerId)
+    {
+        var projectEntities = await _projectRepository.GetAllWithCustomerAsync();
+        
+        var filteredProjects = projectEntities
+            .Where(p => p.CustomerId == customerId)
+            .Select(ProjectFactory.Create)
+            .OfType<Project>()
+            .ToList();
+
+        return filteredProjects;
+    }
+
+
+
+    public async Task<IEnumerable<Project>> GetProjectsByCustomerNameOrEmailAsync(string searchTerm)
+    {
+        var projectEntities = await _projectRepository.GetAllWithCustomerAsync();
+
+        var filteredProjects = projectEntities
+            .Where(x => x.Customer != null &&
+                (x.Customer.Name.Contains(searchTerm) ||
+                x.Customer.Email!.Contains(searchTerm)))
+            .Select(ProjectFactory.Create)
+            .OfType<Project>()
+            .ToList();
+
+        return filteredProjects;
+    }
+
 
 
     // UPDATE //
