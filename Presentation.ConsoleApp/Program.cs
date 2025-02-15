@@ -21,6 +21,7 @@ var services = new ServiceCollection()
     .AddScoped<CustomerDialog>()
     .AddScoped<CreateProjectDialog>()
     .AddScoped<ViewProjectsDialog>()
+    .AddScoped<UpdateProjectDialog>()
     .BuildServiceProvider();
 
 var menu = services.GetRequiredService<MainMenu>();

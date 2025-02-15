@@ -69,8 +69,9 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         // ---- Send the form to ProjectService to create the project ----
         var success = await _projectService.CreateProjectAsync(form);
 
+        Console.Clear();
         Console.WriteLine(success ? "Project created successfully!" : "Failed to create project.");
-        Console.WriteLine("Press any key to continue...");
+        Console.WriteLine("\nPress any key to continue...");
         Console.ReadKey();
     }
     #endregion

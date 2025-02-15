@@ -1,6 +1,7 @@
 ﻿using Business.Factories;
 using Business.Interfaces;
 using Business.Models;
+using Data.Enums;
 using Data.Interfaces;
 
 namespace Business.Services;
@@ -77,7 +78,7 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
         }
     }
 
-    public async Task<Project?> GetProjectById(int id)
+    public async Task<Project?> GetProjectByIdAsync(int id)
     {
         try
         {
@@ -125,7 +126,7 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
 
 
     // UPDATE //
-    public async Task<bool> UpdateProjectAsync(int id, string title, string? description, string startDate, string? endDate)
+    public async Task<bool> UpdateProjectAsync(int id, string title, string? description, string startDate, string? endDate, string status)
     {
         try
         {
@@ -158,6 +159,12 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
             if (!string.IsNullOrWhiteSpace(endDate) && DateTime.TryParseExact(endDate, "yyyy-mm-dd", null, System.Globalization.DateTimeStyles.None, out DateTime parsedEndDate))
             {
                 projectEntity.EndDate = parsedEndDate;
+                hasChanges = true;
+            }
+
+            if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse(status, true, out ProjectStatus parsedStatus))
+            {
+                projectEntity.Status = parsedStatus;
                 hasChanges = true;
             }
 

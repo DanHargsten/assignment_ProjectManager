@@ -5,10 +5,11 @@ namespace Presentation.ConsoleApp.Menus;
 /// <summary>
 /// Handles project-related menu options.
 /// </summary>
-public class ProjectMenu(CreateProjectDialog createProjectDialog, ViewProjectsDialog viewProjectsDialog)
+public class ProjectMenu(CreateProjectDialog createProjectDialog, ViewProjectsDialog viewProjectsDialog, UpdateProjectDialog updateProjectDialog)
 {
     private readonly CreateProjectDialog _createProjectDialog = createProjectDialog;
     private readonly ViewProjectsDialog _viewProjectsDialog = viewProjectsDialog;
+    private readonly UpdateProjectDialog _updateProjectDialog = updateProjectDialog;
 
     public async Task ShowProjectMenuAsync()
     {
@@ -20,7 +21,8 @@ public class ProjectMenu(CreateProjectDialog createProjectDialog, ViewProjectsDi
             Console.WriteLine("---------------------------------------------\n");
             Console.WriteLine("Pick an option below");
             Console.WriteLine("1. Add New Project");
-            Console.WriteLine("2. View All Projects\n");
+            Console.WriteLine("2. View All Projects");
+            Console.WriteLine("3. Update a Project\n");
             Console.Write("Your option: ");
 
             string option = Console.ReadLine()!;
@@ -31,6 +33,9 @@ public class ProjectMenu(CreateProjectDialog createProjectDialog, ViewProjectsDi
                     break;
                 case "2":
                     await _viewProjectsDialog.ExecuteAsync();
+                    break;
+                case "3":
+                    await _updateProjectDialog.ExecuteAsync();
                     break;
             }
         }

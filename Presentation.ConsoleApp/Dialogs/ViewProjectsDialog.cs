@@ -1,6 +1,5 @@
 ﻿using Business.Interfaces;
 using Business.Models;
-using System.Data;
 
 namespace Presentation.ConsoleApp.Dialogs;
 
@@ -83,7 +82,7 @@ public class ViewProjectsDialog(IProjectService projectService)
         int index = 1;
         foreach (var project in projects)
         {
-            Console.WriteLine($"{index}. {project!.Title} (Customer: {project.CustomerName})");
+            Console.WriteLine($"[{index}] {project!.Title} (Customer: {project.CustomerName})");
             index++;
         }
 
