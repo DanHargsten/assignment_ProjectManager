@@ -75,11 +75,10 @@ public class UpdateProjectDialog(IProjectService projectService)
         Console.WriteLine("--------------------------------------");
         Console.WriteLine("--------    UPDATE PROJECT    --------");
         Console.WriteLine("--------------------------------------\n");
-        Console.WriteLine($"Updating Project: {selectedProject.Title}");
 
         // Om beskrivningen är för lång, trunkera den så att den inte tar för mycket plats i terminalen
-        string truncatedDescription = selectedProject.Description?.Length > 30
-            ? selectedProject.Description[..30] + "..."
+        string truncatedDescription = selectedProject.Description?.Length > 50
+            ? selectedProject.Description[..50] + "..."
             : selectedProject.Description ?? "No description";
 
         // Visar nuvarande information om projektet
@@ -89,13 +88,13 @@ public class UpdateProjectDialog(IProjectService projectService)
         Console.WriteLine($"End Date: {selectedProject.EndDate?.ToString("yyyy-MM-dd") ?? "N/A"}");
         Console.WriteLine($"Current Status: {GetFormattedStatus(selectedProject.Status)}");
 
-        Console.WriteLine("\nLeave fields empty to keep current values.\n");
+        Console.WriteLine("\n** Leave fields empty to keep current values **");
 
         // Hämtar användarens uppdateringar, behåller nuvarande värden om fälten lämnas tomma
         string newTitle = GetUserInput($"New Title: ", selectedProject.Title);
         string newDescription = GetUserInput($"New Description: ", selectedProject.Description ?? "");
         string newStartDate = GetValidDateInput($"New Start Date (yyyy-MM-dd): ", selectedProject.StartDate.ToString("yyyy-MM-dd"));
-        string newEndDate = GetValidDateInput($"New End Date (yyyy-MM-dd, current: ", selectedProject.EndDate?.ToString("yyyy-MM-dd") ?? "");
+        string newEndDate = GetValidDateInput($"New End Date (yyyy-MM-dd:", selectedProject.EndDate?.ToString("yyyy-MM-dd") ?? "");
         ProjectStatus newStatus = GetValidStatusInput($"New Status: ", selectedProject.Status);
 
         // Uppdaterar projektet via ProjectService
@@ -111,13 +110,14 @@ public class UpdateProjectDialog(IProjectService projectService)
         else
         {
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("\nFailed to update project.");
+            Console.WriteLine("Failed to update project.");
             Console.ResetColor();
         }
 
-        Console.WriteLine("Press any key to return...");
+        Console.WriteLine("\nPress any key to return...");
         Console.ReadKey();
     }
+
 
 
 
@@ -150,7 +150,7 @@ public class UpdateProjectDialog(IProjectService projectService)
                 return input;
 
             Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Invalid date format. Please use yyyy-MM-dd.");
+            Console.WriteLine("\nInvalid date format. Please use yyyy-MM-dd.");
             Console.ResetColor();
         }
     }
@@ -162,17 +162,19 @@ public class UpdateProjectDialog(IProjectService projectService)
     /// </summary>
     private static ProjectStatus GetValidStatusInput(string prompt, ProjectStatus currentStatus)
     {
-        Console.WriteLine("\nSelect project status:");
+        Console.WriteLine("--------------------------------------");
+        Console.WriteLine("Available project statuses");
         var statuses = Enum.GetValues<ProjectStatus>().Cast<ProjectStatus>().ToList();
 
         for (int i = 0; i < statuses.Count; i++)
         {
             Console.WriteLine($"{i + 1}. {GetFormattedStatus(statuses[i])}");
         }
+        Console.WriteLine("--------------------------------------");
 
         while (true)
         {
-            Console.Write("Choose status (enter number, or leave empty to keep current): ");
+            Console.Write("Choose status: ");
             string input = Console.ReadLine()!;
 
             if (string.IsNullOrWhiteSpace(input))
@@ -183,7 +185,9 @@ public class UpdateProjectDialog(IProjectService projectService)
                 return statuses[statusIndex - 1];
             }
 
-            Console.WriteLine("Invalid selection. Please enter a valid number.");
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine("\nInvalid selection. Please enter a valid number.");
+            Console.ResetColor();
         }
     }
 
