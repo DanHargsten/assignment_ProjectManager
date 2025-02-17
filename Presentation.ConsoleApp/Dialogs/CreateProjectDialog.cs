@@ -1,8 +1,10 @@
 ﻿using Business.Interfaces;
 using Business.Models;
 using Data.Enums;
+using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Dialogs;
+
 
 /// <summary>
 /// Handles user input for creating a new project and passes it to the ProjectService.
@@ -12,7 +14,9 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
     private readonly IProjectService _projectService = projectService;
     private readonly ICustomerService _customerService = customerService;
 
+
     #region Main Execution
+
     /// <summary>
     /// Handles user input to create a new project.
     /// Uses ProjectService to perform the actual creation.
@@ -23,35 +27,36 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         Console.WriteLine("-------------------------------------");
         Console.WriteLine("------   CREATE NEW PROJECT    ------");
         Console.WriteLine("-------------------------------------\n");
-        Console.WriteLine("* = optional input, press Enter to skip\n");
+        ConsoleHelper.WriteOptionalFieldNotice();
 
 
-        // Få användarinput för projektdetaljerna
-        string title = GetUserInput("Enter project title: ");
-        string? description = GetOptionalUserInput("* Enter project description: ");
+        // Få användarens input för projektdetaljer
+        string title = InputHelper.GetUserInput(" Enter project title: ");
+        string? description = InputHelper.GetUserOptionalInput(" * Enter project description: ");
 
         // Start- och slutdatum från användaren
-        DateTime startDate = GetDateInput("Enter project start date (YYYY-MM-DD): ");
-        DateTime? endDate = GetNullableDateInput("* Enter project end date (YYYY-MM-DD): ");
-        
+        DateTime startDate = GetDateInput(" Enter project start date (YYYY-MM-DD): ");
+        DateTime? endDate = GetNullableDateInput(" * Enter project end date (YYYY-MM-DD): ");
 
-        // Listar befintliga kunder
-        var customers = await _customerService.GetCustomersAsync();
-        if (!customers.Any())
+
+        // Lista befintliga kunder och låt användaren välja en
+        var customers = (await _customerService.GetCustomersAsync()).ToList();
+        if (customers.Count == 0)
         {
-            Console.WriteLine("No customers available. Please add a customer first.");
+            ConsoleHelper.WriteLineColored("No customers available. Please add a customer first.", ConsoleColor.Yellow);
+            Console.WriteLine("\nPress any key to return...");
             return;
         }
 
         var selectedCustomer = SelectCustomer(customers!);
         if (selectedCustomer == null) return;
 
-        // Listar projektstatusar (Not Started, In Progress, Paused, Completed)
+        // Lista tillgängliga projektstatusar och låt användaren välja en
         var selectedStatus = SelectProjectStatus();
         if (selectedStatus == null) return;
 
 
-        // Skapa projektformulärobjektet
+        // Skapa ett formulär med all information
         var form = new ProjectRegistrationForm
         {
             Title = title,
@@ -63,51 +68,24 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         };
 
 
-        // Skicka formuläret till ProjectService för att skapa projektet
+        // Skicka projektet till service-lagret för att skapas
         var success = await _projectService.CreateProjectAsync(form);
 
         Console.Clear();
-        Console.WriteLine(success ? "Project created successfully!" : "Failed to create project.");
+        if (success)
+            ConsoleHelper.WriteLineColored("Project created successfully!", ConsoleColor.Green);
+        else
+            ConsoleHelper.WriteLineColored("Failed to create project.", ConsoleColor.Red);
+
         Console.WriteLine("\nPress any key to continue...");
         Console.ReadKey();
     }
+
     #endregion
 
 
 
-
     #region Helper Methods
-    /// <summary>
-    /// Prompts user for input and ensures it's not empty.
-    /// </summary>
-    private static string GetUserInput(string prompt)
-    {
-        while (true)
-        {
-            Console.Write(prompt);
-            string input = Console.ReadLine()!.Trim();
-
-            if (!string.IsNullOrWhiteSpace(input))            
-                return input;
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Can't leave this field empty. Please enter a value.\n");
-            Console.ResetColor();
-        }        
-    }
-
-
-    /// <summary>
-    /// Gets user input where the field can be optional. Allows skipping by pressing ENTER
-    /// </summary>
-    private static string? GetOptionalUserInput(string prompt)
-    {
-        Console.Write(prompt);
-        string input = Console.ReadLine()!.Trim();
-        return string.IsNullOrWhiteSpace(input) ? null : input;
-    }
-
-
 
     /// <summary>
     /// Prompts user to enter a valid date.
@@ -120,9 +98,7 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
             if (DateTime.TryParse(Console.ReadLine(), out DateTime date))
                 return date;
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Invalid date format. Please use YYYY-MM-DD.\n");
-            Console.ResetColor();
+            ConsoleHelper.WriteLineColored("Invalid date format. Please use YYYY-MM-DD.\n", ConsoleColor.Red);
         }
     }
 
@@ -141,10 +117,8 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
 
             if (DateTime.TryParse(input, out DateTime date))
                 return date;
-            
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Invalid date format. Please use YYYY-MM-DD.\n");
-            Console.ResetColor();
+
+            ConsoleHelper.WriteLineColored("Invalid date format. Please use YYYY-MM-DD.\n", ConsoleColor.Red);
         }
     }
 
@@ -157,6 +131,7 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
     {
         while (true)
         {
+            // Visa alla tillgängliga kunder
             Console.WriteLine("\nSelect a customer for the project:");
             int index = 1;
             foreach (var customer in customers)
@@ -165,15 +140,23 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
                 index++;
             }
 
-            Console.Write("Choose customer (enter number): ");
+            Console.Write("\nEnter customer number to choose.\n");
+            ConsoleHelper.WriteLineColored("Press '0' or leave empty to go back to the Project Menu.", ConsoleColor.Yellow);
+            Console.Write("> ");
+            string input = Console.ReadLine()!.Trim();
+
+            if (string.IsNullOrWhiteSpace(input) || input == "0")
+            {
+                return null;
+            }
+
+            // Säkerställer att användaren valt ett giltigt kund-index
             if (int.TryParse(Console.ReadLine(), out int customerIndex) && customerIndex >= 1 && customerIndex <= customers.Count())
             {
                 return customers.ElementAt(customerIndex - 1);
             }
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Invalid selection. Please enter a valid number.\n");
-            Console.ResetColor();
+            ConsoleHelper.WriteLineColored("Invalid selection. Please enter a valid number.\n", ConsoleColor.Red);
         }
     }
 
@@ -188,10 +171,11 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         
         while (true)
         {
+            // Lista tillgängliga statusar
             Console.WriteLine("\nSelect project status:");
             for (int i = 0; i < statuses.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {statuses[i]}");
+                Console.WriteLine($"{i + 1}. {StatusHelper.GetFormattedStatus(statuses[i])}");
             }
 
             Console.Write("Choose status (enter number): ");
@@ -200,10 +184,9 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
                 return statuses[statusIndex - 1];
             }
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Invalid selection. Please enter a valid number.\n");
-            Console.ResetColor();
+            ConsoleHelper.WriteLineColored("Invalid selection. Please enter a valid number.\n", ConsoleColor.Red);
         }
     }
+
     #endregion
 }

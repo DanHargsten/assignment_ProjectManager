@@ -26,13 +26,15 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
         var customers = (await _customerService.GetCustomersAsync()).ToList();
         if (!customers.Any())
         {
+            Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("No customers found.");
+            Console.ResetColor();
+            Console.WriteLine("\nPress any key to return to Customer Menu...");
             Console.ReadKey();
             return;
         }
 
         // Visa alla kunder i en lista
-        Console.WriteLine("Available Customers:");
         for (int i = 0; i < customers.Count; i++)
         {
             Console.WriteLine($"{i + 1}. {customers[i]!.Name} ({customers[i]!.Email})");

@@ -3,7 +3,7 @@
 namespace Presentation.ConsoleApp.Dialogs;
 
 /// <summary>
-/// Handles the process of deleting a project.
+/// Handles deleting a project.
 /// Lists all projects, allows the user to select one, and confirms deletion.
 /// </summary>
 public class DeleteProjectDialog(IProjectService projectService)

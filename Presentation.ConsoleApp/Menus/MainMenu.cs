@@ -1,4 +1,6 @@
-﻿namespace Presentation.ConsoleApp.Menus;
+﻿using Presentation.ConsoleApp.Helpers;
+
+namespace Presentation.ConsoleApp.Menus;
 
 public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
 {
@@ -16,11 +18,21 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
             Console.WriteLine("---------- CRUD testing ----------");
             Console.WriteLine("----------------------------------\n");
             Console.WriteLine("1. Handle Customers");
-            Console.WriteLine("2. Handle Projects");
-            Console.WriteLine("3. Exit");
-            Console.Write("Pick an option: ");
+            Console.WriteLine("2. Handle Projects\n");
 
-            string option = Console.ReadLine()!;
+            ConsoleHelper.WriteLineColored("Press '0' or leave empty to go back to Exit.", ConsoleColor.Yellow);
+
+            Console.Write("> ");
+            string option = Console.ReadLine()!.Trim();
+
+            if (string.IsNullOrWhiteSpace(option) || option == "0")
+            {
+                Console.Clear();
+                Console.WriteLine("Exiting application...");
+                await Task.Delay(1500);
+                return;
+            }
+
             switch (option)
             {
                 case "1":
@@ -38,8 +50,8 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
                     break;
 
                 default:
-                    Console.Clear();
-                    Console.WriteLine("Invalid input, press any key to try again...");
+                    ConsoleHelper.WriteLineColored("\nInvalid input, press any key to try again...", ConsoleColor.Red);
+                    Console.ReadKey();
                     break;
             }
         }

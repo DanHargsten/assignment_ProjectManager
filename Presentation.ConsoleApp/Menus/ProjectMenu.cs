@@ -1,4 +1,5 @@
 ﻿using Presentation.ConsoleApp.Dialogs;
+using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Menus;
 
@@ -26,9 +27,17 @@ public class ProjectMenu(CreateProjectDialog createProjectDialog, ViewProjectsDi
             Console.WriteLine("2. View All Projects");
             Console.WriteLine("3. Update a Project");
             Console.WriteLine("4. Delete a Project\n");
-            Console.Write("Your option: ");
 
-            string option = Console.ReadLine()!;
+            ConsoleHelper.WriteLineColored("Press '0' or leave empty to go back to Main Menu.", ConsoleColor.Yellow);
+
+            Console.Write("> ");
+            string option = Console.ReadLine()!.Trim();
+
+            if (string.IsNullOrWhiteSpace(option) || option == "0")
+            {
+                return;
+            }
+
             switch (option)
             {
                 case "1":

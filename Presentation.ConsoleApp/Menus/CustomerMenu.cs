@@ -1,4 +1,5 @@
 ﻿using Presentation.ConsoleApp.Dialogs;
+using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Menus;
 
@@ -21,14 +22,22 @@ public class CustomerMenu(CreateCustomerDialog createCustomerDialog, ViewCustome
             Console.WriteLine("----------------------------------------");
             Console.WriteLine("------     CUSTOMER MANAGMENT     ------");
             Console.WriteLine("----------------------------------------\n");
-            Console.WriteLine("Pick an option below");
+            Console.WriteLine("Pick an option below.");
             Console.WriteLine("1. Add New Customer");
             Console.WriteLine("2. View All Customers");
             Console.WriteLine("3. Update a Customer");
             Console.WriteLine("4. Delete a Customer\n");
-            Console.Write("Your option: ");
 
-            string option = Console.ReadLine()!;
+            ConsoleHelper.WriteLineColored("Press '0' or leave empty to go back to Main Menu.", ConsoleColor.Yellow);
+
+            Console.Write("> ");
+            string option = Console.ReadLine()!.Trim();
+
+            if (string.IsNullOrWhiteSpace(option) || option == "0")
+            {
+                return;
+            }
+
             switch (option)
             {
                 case "1":
@@ -38,10 +47,15 @@ public class CustomerMenu(CreateCustomerDialog createCustomerDialog, ViewCustome
                     await _viewCustomersDialog.ExecuteAsync();
                     break;
                 //case "3":
-                //    await _updateProjectDialog.ExecuteAsync();
                 //    break;
                 case "4":
                     await _deleteCustomerDialog.ExecuteAsync();
+                    break;
+
+                default:
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Invalid input. Try again.");
+                    Console.ResetColor();
                     break;
             }
         }
