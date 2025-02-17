@@ -24,8 +24,8 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
             switch (option)
             {
                 case "1":
-                    //await _customerDialog.ShowCustomerMenuAsync();
-                    //break;
+                    await _customerMenu.ShowCustomerMenuAsync();
+                    break;
 
                 case "2":
                     await _projectMenu.ShowProjectMenuAsync();

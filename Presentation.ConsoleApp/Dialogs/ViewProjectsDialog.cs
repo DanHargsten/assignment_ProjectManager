@@ -1,5 +1,6 @@
 ﻿using Business.Interfaces;
 using Business.Models;
+using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Dialogs;
 
@@ -16,9 +17,6 @@ public class ViewProjectsDialog(IProjectService projectService)
     /// Shows the main project viewing menu.
     /// </summary>
     /// <remarks>
-    /// This method is named ExecuteAsync() instead of ViewProjectAsync()
-    /// to indicate that it is responsible for handling user interaction.
-    /// </remarks>
     public async Task ExecuteAsync()
     {
         while (true)
@@ -57,7 +55,6 @@ public class ViewProjectsDialog(IProjectService projectService)
 
 
 
-    // --------------------------------
 
 
 
@@ -111,7 +108,7 @@ public class ViewProjectsDialog(IProjectService projectService)
         Console.WriteLine($"Description: {project.Description}");
         Console.WriteLine($"Start Date: {project.StartDate:yyyy-MM-dd}");
         Console.WriteLine($"End Date: {(project.EndDate.HasValue ? project.EndDate.Value.ToString("yyyy-MM-dd") : "N/A")}");
-        Console.WriteLine($"Status: {project.Status}");
+        Console.WriteLine($"Status: {StatusHelper.GetFormattedStatus(project.Status)}");
         Console.WriteLine($"Customer: {project.CustomerName}");
 
         Console.WriteLine("\nPress any key to go back...");

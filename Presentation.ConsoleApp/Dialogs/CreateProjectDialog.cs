@@ -17,28 +17,25 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
     /// Handles user input to create a new project.
     /// Uses ProjectService to perform the actual creation.
     /// </summary>
-    /// <remarks>
-    /// This method is named ExecuteAsync() instead of CreateProjectAsync()
-    /// to indicate that it is responsible for handling user interaction,
-    /// not performing the actual project creation.
-    /// </remarks>
     public async Task ExecuteAsync()
     {
         Console.Clear();
-        Console.WriteLine("CREATE NEW PROJECT");
-        Console.WriteLine("* = optional\n");
+        Console.WriteLine("-------------------------------------");
+        Console.WriteLine("------   CREATE NEW PROJECT    ------");
+        Console.WriteLine("-------------------------------------\n");
+        Console.WriteLine("* = optional input, press Enter to skip\n");
 
 
-        // ---- Get user input for the project details ----
+        // Få användarinput för projektdetaljerna
         string title = GetUserInput("Enter project title: ");
         string? description = GetOptionalUserInput("* Enter project description: ");
 
-        // Get the project start and end date from the user
+        // Start- och slutdatum från användaren
         DateTime startDate = GetDateInput("Enter project start date (YYYY-MM-DD): ");
         DateTime? endDate = GetNullableDateInput("* Enter project end date (YYYY-MM-DD): ");
         
 
-        // ---- Select an existing customer ----
+        // Listar befintliga kunder
         var customers = await _customerService.GetCustomersAsync();
         if (!customers.Any())
         {
@@ -49,12 +46,12 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         var selectedCustomer = SelectCustomer(customers!);
         if (selectedCustomer == null) return;
 
-        // ---- Select the project status (Not Started, In Progress, Paused, Completed) ----
+        // Listar projektstatusar (Not Started, In Progress, Paused, Completed)
         var selectedStatus = SelectProjectStatus();
         if (selectedStatus == null) return;
 
 
-        // ---- Create the project form object ----
+        // Skapa projektformulärobjektet
         var form = new ProjectRegistrationForm
         {
             Title = title,
@@ -66,7 +63,7 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         };
 
 
-        // ---- Send the form to ProjectService to create the project ----
+        // Skicka formuläret till ProjectService för att skapa projektet
         var success = await _projectService.CreateProjectAsync(form);
 
         Console.Clear();
@@ -77,7 +74,6 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
     #endregion
 
 
-    ////////////////////////////////////
 
 
     #region Helper Methods

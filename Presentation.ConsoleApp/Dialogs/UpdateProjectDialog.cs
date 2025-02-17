@@ -1,6 +1,7 @@
 ﻿using Business.Interfaces;
 using Business.Models;
 using Data.Enums;
+using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Dialogs;
 
@@ -86,7 +87,7 @@ public class UpdateProjectDialog(IProjectService projectService)
         Console.WriteLine($"Description: {truncatedDescription}");
         Console.WriteLine($"Start Date: {selectedProject.StartDate:yyyy-MM-dd}");
         Console.WriteLine($"End Date: {selectedProject.EndDate?.ToString("yyyy-MM-dd") ?? "N/A"}");
-        Console.WriteLine($"Current Status: {GetFormattedStatus(selectedProject.Status)}");
+        Console.WriteLine($"Current Status: {StatusHelper.GetFormattedStatus(selectedProject.Status)}");
 
         Console.WriteLine("\n** Leave fields empty to keep current values **");
 
@@ -104,17 +105,17 @@ public class UpdateProjectDialog(IProjectService projectService)
         if (success)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Project updated successfully!");
-            Console.ResetColor();
+            Console.WriteLine("Project updated successfully!");           
         }
         else
         {
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("Failed to update project.");
-            Console.ResetColor();
         }
 
-        Console.WriteLine("\nPress any key to return...");
+        Console.ResetColor();
+
+        Console.WriteLine("\nPress any key to continue...");
         Console.ReadKey();
     }
 
@@ -134,7 +135,6 @@ public class UpdateProjectDialog(IProjectService projectService)
 
 
 
-    // Validering av datum-input genererat av ChatGPT.
     /// <summary>
     /// Ensures the user provides a valid date input or keeps the current value.
     /// </summary>
@@ -168,7 +168,7 @@ public class UpdateProjectDialog(IProjectService projectService)
 
         for (int i = 0; i < statuses.Count; i++)
         {
-            Console.WriteLine($"{i + 1}. {GetFormattedStatus(statuses[i])}");
+            Console.WriteLine($"{i + 1}. {StatusHelper.GetFormattedStatus(statuses[i])}");
         }
         Console.WriteLine("--------------------------------------");
 
@@ -189,21 +189,5 @@ public class UpdateProjectDialog(IProjectService projectService)
             Console.WriteLine("\nInvalid selection. Please enter a valid number.");
             Console.ResetColor();
         }
-    }
-
-
-
-    // Enum formatering med switch genererad av ChatGPT
-    /// <summary>
-    /// Converts a ProjectStatus enum value to a user-friendly string.
-    /// </summary>
-    private static string GetFormattedStatus(ProjectStatus status)
-    {
-        return status switch
-        {
-            ProjectStatus.NotStarted => "Not Started",
-            ProjectStatus.InProgress => "In Progress",
-            _ => status.ToString()
-        };
     }
 }
