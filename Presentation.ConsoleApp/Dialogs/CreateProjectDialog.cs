@@ -151,7 +151,7 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
             }
 
             // Säkerställer att användaren valt ett giltigt kund-index
-            if (int.TryParse(Console.ReadLine(), out int customerIndex) && customerIndex >= 1 && customerIndex <= customers.Count())
+            if (int.TryParse(input, out int customerIndex) && customerIndex >= 1 && customerIndex <= customers.Count())
             {
                 return customers.ElementAt(customerIndex - 1);
             }

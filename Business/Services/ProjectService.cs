@@ -21,6 +21,10 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
     {
         try
         {
+            // DEBUG
+            Console.WriteLine($"Debug: Trying to fetch customer with ID {form.CustomerId}");
+            ////////
+
             // Fetch the customer from the database to ensure it exists
             var customer = await _customerRepository.GetOneAsync(x => x.Id == form.CustomerId);
             if (customer == null)

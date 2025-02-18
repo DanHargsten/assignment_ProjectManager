@@ -43,7 +43,7 @@ public class CustomerServiceTests
         var customerForm = new CustomerRegistrationForm
         {
             Name = "John Doe",
-            Email = "john.doe@example.com",
+            Email = "john.doe@domain.com",
             PhoneNumber = "123456789"
         };
 
@@ -57,7 +57,7 @@ public class CustomerServiceTests
         Assert.Contains(customers, c =>
             c != null &&
             c.Name == "John Doe" &&
-            (c.Email ?? "") == "john.doe@example.com" &&
+            (c.Email ?? "") == "john.doe@domain.com" &&
             (c.PhoneNumber ?? "") == "123456789");
     }
 
@@ -93,7 +93,7 @@ public class CustomerServiceTests
         var customerForm = new CustomerRegistrationForm
         {
             Name = "Ace",
-            Email = "ace@example.com",
+            Email = "ace@domain.com",
             PhoneNumber = "123456789"
         };
         
@@ -103,14 +103,15 @@ public class CustomerServiceTests
         Assert.NotNull(customer);
 
         // Act
-        bool result = await service.UpdateCustomerAsync(customer!.Id, "Acme", "acme@example.com", "987654321");
+        bool result = await service.UpdateCustomerAsync(customer!.Id, "Acme", "acme@domain.com", "987654321");
         var updatedCustomer = (await service.GetCustomersAsync()).FirstOrDefault(c => c.Id == customer.Id);
+        Assert.NotNull(updatedCustomer);
 
         // Assert
         Assert.True(result);
         Assert.NotNull(updatedCustomer);
         Assert.Equal("Acme", updatedCustomer!.Name);
-        Assert.Equal("acme@example.com", updatedCustomer.Email);
+        Assert.Equal("acme@domain.com", updatedCustomer.Email);
         Assert.Equal("987654321", updatedCustomer.PhoneNumber);
     }
 
@@ -126,7 +127,7 @@ public class CustomerServiceTests
         var service = await GetCustomerServiceAsync();
 
         // Act
-        bool result = await service.UpdateCustomerAsync(9999, "Fake Name", "fake@example.com", "000000000");
+        bool result = await service.UpdateCustomerAsync(9999, "Fake Name", "fake@domain.com", "000000000");
 
         // Assert
         Assert.False(result);
@@ -142,7 +143,7 @@ public class CustomerServiceTests
     {
         // Arrange
         var service = await GetCustomerServiceAsync();
-        var customerForm = new CustomerRegistrationForm { Name = "Jane Doe", Email = "jane.doe@example.com", PhoneNumber = "987654321" };
+        var customerForm = new CustomerRegistrationForm { Name = "Jane Doe", Email = "jane.doe@domain.com", PhoneNumber = "987654321" };
         await service.CreateCustomerAsync(customerForm);
         var customer = (await service.GetCustomersAsync()).FirstOrDefault() ?? throw new InvalidOperationException("..");
 
