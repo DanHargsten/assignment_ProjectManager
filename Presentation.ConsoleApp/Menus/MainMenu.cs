@@ -20,7 +20,7 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
             Console.WriteLine("1. Handle Customers");
             Console.WriteLine("2. Handle Projects\n");
 
-            ConsoleHelper.WriteLineColored("Press '0' or leave empty to go back to Exit.", ConsoleColor.Yellow);
+            ConsoleHelper.WriteLineColored("Press '0' or leave empty to Exit.", ConsoleColor.Yellow);
 
             Console.Write("> ");
             string option = Console.ReadLine()!.Trim();
@@ -41,12 +41,6 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
 
                 case "2":
                     await _projectMenu.ShowProjectMenuAsync();
-                    break;
-
-                case "3":
-                    Console.Clear();
-                    Console.WriteLine("Exiting application...");
-                    exit = true;
                     break;
 
                 default:

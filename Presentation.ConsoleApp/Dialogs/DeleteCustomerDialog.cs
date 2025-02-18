@@ -87,7 +87,7 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
         // Skriver ut alla kunder
         for (int i = 0; i < customers.Count; i++)
         {
-            Console.WriteLine($"{i + 1}. {customers[i]!.Name})");
+            Console.WriteLine($"{i + 1}. {customers[i]!.Name}");
         }
 
         Console.Write("\nEnter customer number to delete: ");
@@ -170,6 +170,7 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
             );
 
             ConsoleHelper.WriteLineColored("\nProject marked as completed.", ConsoleColor.Green);
+            Console.ReadKey();
         }
     }
 

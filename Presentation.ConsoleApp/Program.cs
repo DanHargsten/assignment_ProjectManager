@@ -19,13 +19,14 @@ var services = new ServiceCollection()
     .AddScoped<CustomerMenu>()
     .AddScoped<ProjectMenu>()
     .AddScoped<CustomerDialog>()
-    .AddScoped<CreateProjectDialog>()
-    .AddScoped<ViewProjectsDialog>()
-    .AddScoped<UpdateProjectDialog>()
-    .AddScoped<DeleteProjectDialog>()
     .AddScoped<CreateCustomerDialog>()
+    .AddScoped<CreateProjectDialog>()
     .AddScoped<ViewCustomersDialog>()
+    .AddScoped<ViewProjectsDialog>()
+    .AddScoped<UpdateCustomerDialog>()
+    .AddScoped<UpdateProjectDialog>()
     .AddScoped<DeleteCustomerDialog>()
+    .AddScoped<DeleteProjectDialog>()
     .BuildServiceProvider();
 
 var menu = services.GetRequiredService<MainMenu>();

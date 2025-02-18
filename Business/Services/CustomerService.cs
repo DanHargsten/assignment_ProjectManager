@@ -51,7 +51,7 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
         }
     }
 
-    public async Task<Customer?> GetCustomerById(int id)
+    public async Task<Customer?> GetCustomerByIdAsync(int id)
     {
         try
         {
@@ -114,7 +114,7 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
         try
         {
             var customerEntity = await _customerRepository.GetOneAsync(x => x.Id == id);
-            if (customerEntity == null) return true;
+            if (customerEntity == null) return false;
 
             await _customerRepository.DeleteAsync(customerEntity);
             return true;

@@ -7,10 +7,11 @@ namespace Presentation.ConsoleApp.Menus;
 /// <summary>
 /// Handles customer-related menu options.
 /// </summary>
-public class CustomerMenu(CreateCustomerDialog createCustomerDialog, ViewCustomersDialog viewCustomersDialog, DeleteCustomerDialog deleteCustomerDialog)
+public class CustomerMenu(CreateCustomerDialog createCustomerDialog, ViewCustomersDialog viewCustomersDialog, UpdateCustomerDialog updateCustomerDialog, DeleteCustomerDialog deleteCustomerDialog)
 {
     private readonly CreateCustomerDialog _createCustomerDialog = createCustomerDialog;
     private readonly ViewCustomersDialog _viewCustomersDialog = viewCustomersDialog;
+    private readonly UpdateCustomerDialog _updateCustomerDialog = updateCustomerDialog;
     private readonly DeleteCustomerDialog _deleteCustomerDialog = deleteCustomerDialog;
 
 
@@ -46,8 +47,9 @@ public class CustomerMenu(CreateCustomerDialog createCustomerDialog, ViewCustome
                 case "2":
                     await _viewCustomersDialog.ExecuteAsync();
                     break;
-                //case "3":
-                //    break;
+                case "3":
+                    await _updateCustomerDialog.ExecuteAsync();
+                    break;
                 case "4":
                     await _deleteCustomerDialog.ExecuteAsync();
                     break;
