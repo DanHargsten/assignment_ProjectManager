@@ -130,7 +130,7 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
 
 
     // UPDATE //
-    public async Task<bool> UpdateProjectAsync(int id, string title, string? description, string startDate, string? endDate, string status)
+    public async Task<bool> UpdateProjectAsync(int id, string title, string? description, DateTime? startDate, DateTime? endDate, ProjectStatus status)
     {
         try
         {
@@ -152,25 +152,26 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
                 hasChanges = true;
             }
 
-            // Validate and convert by ChatGPT
-            if (!string.IsNullOrWhiteSpace(startDate) && DateTime.TryParseExact(startDate, "yyyy-mm-dd", null, System.Globalization.DateTimeStyles.None, out DateTime parsedStartDate))
+
+            //if (!string.IsNullOrWhiteSpace(startDate) && DateTime.TryParseExact(startDate, "yyyy-mm-dd", null, System.Globalization.DateTimeStyles.None, out DateTime parsedStartDate))
+            if (startDate.HasValue)
             {
-                projectEntity.StartDate = parsedStartDate;
+                projectEntity.StartDate = startDate.Value;
                 hasChanges = true;
             }
 
-            // Validate and convert by ChatGPT
-            if (!string.IsNullOrWhiteSpace(endDate) && DateTime.TryParseExact(endDate, "yyyy-mm-dd", null, System.Globalization.DateTimeStyles.None, out DateTime parsedEndDate))
+            //if (!string.IsNullOrWhiteSpace(endDate) && DateTime.TryParseExact(endDate, "yyyy-mm-dd", null, System.Globalization.DateTimeStyles.None, out DateTime parsedEndDate))
+            if (endDate.HasValue)
             {
-                projectEntity.EndDate = parsedEndDate;
+                projectEntity.EndDate = endDate.Value;
                 hasChanges = true;
             }
 
-            if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse(status, true, out ProjectStatus parsedStatus))
-            {
-                projectEntity.Status = parsedStatus;
+            //if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse(status, true, out ProjectStatus parsedStatus))
+            //{
+                projectEntity.Status = status;
                 hasChanges = true;
-            }
+            //}
 
             if (!hasChanges) return false;
 

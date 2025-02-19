@@ -94,12 +94,15 @@ public class UpdateProjectDialog(IProjectService projectService)
         // Hämtar användarens uppdateringar, behåller nuvarande värden om fälten lämnas tomma
         string newTitle = GetUserInput($"New Title: ", selectedProject.Title);
         string newDescription = GetUserInput($"New Description: ", selectedProject.Description ?? "");
-        string newStartDate = GetValidDateInput($"New Start Date (yyyy-MM-dd): ", selectedProject.StartDate.ToString("yyyy-MM-dd"));
-        string newEndDate = GetValidDateInput($"New End Date (yyyy-MM-dd:", selectedProject.EndDate?.ToString("yyyy-MM-dd") ?? "");
+        string newStartDateInput = GetValidDateInput($"New Start Date (yyyy-MM-dd): ", selectedProject.StartDate?.ToString("yyyy-MM-dd") ?? "");
+        DateTime? newStartDate = string.IsNullOrWhiteSpace(newStartDateInput) ? selectedProject.StartDate : DateTime.Parse(newStartDateInput);
+
+        string newEndDateInput = GetValidDateInput($"New End Date (yyyy-MM-dd):", selectedProject.EndDate?.ToString("yyyy-MM-dd") ?? "");
+        DateTime? newEndDate = string.IsNullOrWhiteSpace(newEndDateInput) ? selectedProject.EndDate : DateTime.Parse(newEndDateInput);
         ProjectStatus newStatus = GetValidStatusInput($"New Status: ", selectedProject.Status);
 
         // Uppdaterar projektet via ProjectService
-        bool success = await _projectService.UpdateProjectAsync(selectedProject.Id, newTitle, newDescription, newStartDate, newEndDate, newStatus.ToString());
+        bool success = await _projectService.UpdateProjectAsync(selectedProject.Id, newTitle, newDescription, newStartDate, newEndDate, newStatus);
         Console.Clear();
 
         if (success)

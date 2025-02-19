@@ -19,9 +19,9 @@ public class ProjectMenu(CreateProjectDialog createProjectDialog, ViewProjectsDi
         while (true)
         {
             Console.Clear();
-            Console.WriteLine("---------------------------------------------");
-            Console.WriteLine("------        PROJECT MANAGMENT        ------");
-            Console.WriteLine("---------------------------------------------\n");
+            Console.WriteLine("-------------------------------------------");
+            Console.WriteLine("             PROJECT MANAGEMENT            ");
+            Console.WriteLine("-------------------------------------------\n");
             Console.WriteLine("Pick an option below");
             Console.WriteLine("1. Add New Project");
             Console.WriteLine("2. View All Projects");

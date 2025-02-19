@@ -104,7 +104,7 @@ public class CustomerServiceTests
 
         // Act
         bool result = await service.UpdateCustomerAsync(customer!.Id, "Acme", "acme@domain.com", "987654321");
-        var updatedCustomer = (await service.GetCustomersAsync()).FirstOrDefault(c => c.Id == customer.Id);
+        var updatedCustomer = (await service.GetCustomersAsync()).FirstOrDefault(c => c!.Id == customer.Id);
         Assert.NotNull(updatedCustomer);
 
         // Assert

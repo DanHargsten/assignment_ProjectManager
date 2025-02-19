@@ -10,12 +10,13 @@ public class Project
 
     public string? Description { get; set; }
 
-    public DateTime StartDate { get; set; }
+    public DateTime? StartDate { get; set; }
 
     public DateTime? EndDate { get; set; }
+    public DateTime CreatedDate { get; set; }
 
     public ProjectStatus Status { get; set; }
 
     public int CustomerId { get; set; }
-    public string CustomerName { get; set; } = "Unknown";
+    public string CustomerName { get; set; } = "[ERROR] Customer Missing (Fallback: Unknown)";
 }

@@ -13,16 +13,14 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
         while (!exit)
         {
             Console.Clear();
-            Console.WriteLine("----------------------------------");
-            Console.WriteLine("----- CONSOLE APPLICATION UI -----");
-            Console.WriteLine("---------- CRUD testing ----------");
-            Console.WriteLine("----------------------------------\n");
+            Console.WriteLine("-------------------------------------------");
+            Console.WriteLine("       PROJECT MANAGEMENT APPLICATION      ");
+            Console.WriteLine("-------------------------------------------\n");
             Console.WriteLine("1. Handle Customers");
             Console.WriteLine("2. Handle Projects\n");
 
-            ConsoleHelper.WriteLineColored("Press '0' or leave empty to Exit.", ConsoleColor.Yellow);
+            ConsoleHelper.ShowExitPrompt("EXIT application");
 
-            Console.Write("> ");
             string option = Console.ReadLine()!.Trim();
 
             if (string.IsNullOrWhiteSpace(option) || option == "0")

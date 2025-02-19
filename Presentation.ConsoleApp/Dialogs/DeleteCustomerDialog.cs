@@ -153,7 +153,7 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
         Console.WriteLine($"Project: {project.Title}");
         Console.WriteLine($"Description: {project.Description}");
         Console.WriteLine($"Start Date: {project.StartDate:yyyy-MM-dd}");
-        Console.WriteLine($"End Date: {(project.EndDate.HasValue ? project.EndDate.Value.ToString("yyyy-MM-dd") : "N/A")}");
+        Console.WriteLine($"End Date: {(project.EndDate.HasValue ? project.EndDate.Value.ToString("yyyy-MM-dd") : "Not specified")}");
         Console.WriteLine($"Status: {StatusHelper.GetFormattedStatus(project.Status)}");
 
         Console.Write("\nDo you want to mark this project as completed? (yes/no): ");
@@ -164,9 +164,9 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
                 project.Id,
                 project.Title,
                 project.Description,
-                project.StartDate.ToString("yyyy-MM-dd"),
-                project.EndDate?.ToString("yyyy-MM-dd") ?? "",
-                "Completed"
+                project.StartDate,
+                project.EndDate,
+                ProjectStatus.Completed
             );
 
             ConsoleHelper.WriteLineColored("\nProject marked as completed.", ConsoleColor.Green);

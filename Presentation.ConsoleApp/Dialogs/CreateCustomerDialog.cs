@@ -21,9 +21,9 @@ public class CreateCustomerDialog(ICustomerService customerService)
         Console.Clear();
         Console.WriteLine("-------------------------------------");
         Console.WriteLine("------   CREATE NEW CUSTOMER   ------");
-        Console.WriteLine("-------------------------------------\n");
-
-        Console.WriteLine("* = optional");
+        Console.WriteLine("-------------------------------------");
+        ConsoleHelper.WriteOptionalFieldNotice();     
+        
         // Hämta inmatning från användaren
         string name = InputHelper.GetUserInput("Enter Customer Name: ");
         string? email = InputHelper.GetUserOptionalInput("* Enter Customer Email: ");

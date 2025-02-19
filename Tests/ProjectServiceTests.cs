@@ -1,6 +1,7 @@
 ﻿using Business.Models;
 using Business.Services;
 using Data.Contexts;
+using Data.Enums;
 using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 
@@ -169,7 +170,9 @@ public class ProjectServiceTests
         var updatedTitle = "Updated Title";
 
         // Act
-        bool result = await service.UpdateProjectAsync(project.Id, updatedTitle, null, project.StartDate.ToString("yyyy-MM-dd"), null, "NotStarted");
+        //bool result = await service.UpdateProjectAsync(project.Id, updatedTitle, null, project.StartDate.ToString("yyyy-MM-dd"), null, "NotStarted");
+        //bool result = await service.UpdateProjectAsync(project.Id, updatedTitle, null, project.StartDate.HasValue ? StartDate.Value.ToString("yyyy-MM-dd") : "NotStarted");
+        bool result = await service.UpdateProjectAsync(project.Id, updatedTitle, null, project.StartDate, project.EndDate, ProjectStatus.InProgress);
         var updatedProject = (await service.GetProjectsAsync()).FirstOrDefault(p => p!.Id == project.Id)!;
 
         // Assert
@@ -192,7 +195,7 @@ public class ProjectServiceTests
         var service = GetProjectServiceAsync(_dbContext);
 
         // Act
-        bool result = await service.UpdateProjectAsync(999, "Title", null, "2024-01-01", null, "NotStarted");
+        bool result = await service.UpdateProjectAsync(999, "Title", null, DateTime.Parse("2024-01-01"), null, ProjectStatus.NotStarted);
 
         // Assert
         Assert.False(result);

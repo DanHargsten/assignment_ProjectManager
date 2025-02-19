@@ -8,11 +8,12 @@ public class ProjectRegistrationForm
 
     public string? Description { get; set; }
 
-    public DateTime StartDate { get; set; }
+    public DateTime? StartDate { get; set; }
 
     public DateTime? EndDate { get; set; }
 
     public ProjectStatus Status { get; set; } = ProjectStatus.NotStarted;
 
     public int CustomerId { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.UtcNow;
 }

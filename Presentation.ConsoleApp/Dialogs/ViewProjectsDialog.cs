@@ -1,6 +1,8 @@
 ﻿using Business.Interfaces;
 using Business.Models;
+using Data.Enums;
 using Presentation.ConsoleApp.Helpers;
+using System.ComponentModel.Design;
 
 namespace Presentation.ConsoleApp.Dialogs;
 
@@ -73,9 +75,9 @@ public class ViewProjectsDialog(IProjectService projectService)
         }
 
         Console.Clear();
-        Console.WriteLine("------------------------------------");
-        Console.WriteLine("--------    ALL PROJECTS    --------");
-        Console.WriteLine("------------------------------------\n");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("             VIEW ALL PROJECTS             ");
+        Console.WriteLine("-------------------------------------------\n");
         int index = 1;
         foreach (var project in projects)
         {
@@ -92,7 +94,7 @@ public class ViewProjectsDialog(IProjectService projectService)
         }
 
         var selectedProject = projects.ElementAt(selectedIndex - 1)!;
-        await ViewProjectDetailsAsync(selectedProject);
+        await ViewProjectDetailsAsync(selectedProject, "return to Project Menu");
     }
 
 
@@ -100,18 +102,37 @@ public class ViewProjectsDialog(IProjectService projectService)
     /// <summary>
     /// Displays detailed information about a selected project.
     /// </summary>
-    private static Task ViewProjectDetailsAsync(Project project)
+    public static Task ViewProjectDetailsAsync(Project project, string exitMessage)
     {
         Console.Clear();
-        Console.WriteLine("PROJECT DETAILS\n");
-        Console.WriteLine($"Title: {project.Title}");
-        Console.WriteLine($"Description: {project.Description}");
-        Console.WriteLine($"Start Date: {project.StartDate:yyyy-MM-dd}");
-        Console.WriteLine($"End Date: {(project.EndDate.HasValue ? project.EndDate.Value.ToString("yyyy-MM-dd") : "N/A")}");
-        Console.WriteLine($"Status: {StatusHelper.GetFormattedStatus(project.Status)}");
-        Console.WriteLine($"Customer: {project.CustomerName}");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("              PROJECT DETAILS              ");
+        Console.WriteLine("-------------------------------------------\n");
 
-        Console.WriteLine("\nPress any key to go back...");
+        ConsoleHelper.WriteColored("Title: ".PadRight(15), ConsoleColor.White);
+        Console.WriteLine($"{project.Title}");
+
+        ConsoleHelper.WriteColored("Description: ".PadRight(15), ConsoleColor.White);
+        Console.WriteLine($"{project.Description}");
+
+        ConsoleHelper.WriteColored("Customer: ".PadRight(15), ConsoleColor.White);
+        Console.WriteLine($"{project.CustomerName}");
+
+        ConsoleHelper.WriteColored("Start Date: ".PadRight(15), ConsoleColor.White);
+        Console.WriteLine($"{(project.StartDate.HasValue ? project.StartDate.Value.ToString("yyyy-MM-dd") : "Not specified.")}");
+
+        ConsoleHelper.WriteColored("End Date: ".PadRight(15), ConsoleColor.White);
+        Console.WriteLine($"{(project.EndDate.HasValue ? project.EndDate.Value.ToString("yyyy-MM-dd") : "Not specified.")}");
+
+        ConsoleHelper.WriteColored("Status: ".PadRight(15), ConsoleColor.White);
+        Console.WriteLine($"{StatusHelper.GetFormattedStatus(project.Status)}");
+
+        ConsoleHelper.WriteColored("Created: ".PadRight(15), ConsoleColor.White);
+        Console.WriteLine($"{project.CreatedDate:yyyy-MM-dd}");
+
+        Console.WriteLine("\n-------------------------------------------");
+
+        ConsoleHelper.ShowExitPrompt(exitMessage);
         Console.ReadKey();
 
         return Task.CompletedTask;
@@ -126,10 +147,9 @@ public class ViewProjectsDialog(IProjectService projectService)
     private async Task SearchProjectsByCustomerAsync()
     {
         Console.Clear();
-        Console.WriteLine("-------------------------------------");
-        Console.WriteLine("-------    SEARCH PROJECTS    -------");
-        Console.WriteLine("---------    by customer    ---------");
-        Console.WriteLine("-------------------------------------\n");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("              SEARCH PROJECTS              ");
+        Console.WriteLine("-------------------------------------------\n");     
 
         Console.Write("Enter Customer ID, Name, or Email: ");
         string input = Console.ReadLine()!.Trim();
@@ -147,6 +167,26 @@ public class ViewProjectsDialog(IProjectService projectService)
         {
             projects = await _projectService.GetProjectsByCustomerIdAsync(customerID);
         }
+        else
+        {
+            projects = await _projectService.GetProjectsByCustomerNameOrEmailAsync(input);
+        }
+        
+        if (!projects.Any())
+        {
+            Console.WriteLine("\nNo projects found.");
+        }
+        else
+        {
+            Console.WriteLine("\nFound projects:");
+            foreach (var project in projects)
+            {
+                Console.WriteLine($"- {project.Title} ({StatusHelper.GetFormattedStatus(project.Status)})");
+            }
+        }
+
+        Console.WriteLine("\nPress any key to return...");
+        Console.ReadKey();
     }
     #endregion
 }

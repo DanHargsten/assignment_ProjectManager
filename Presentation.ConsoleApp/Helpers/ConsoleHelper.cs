@@ -30,11 +30,22 @@ public class ConsoleHelper
 
     /// <summary>
     /// A notification to the user that a field with an asterisk is optional.
-    /// The asterisk is colored for visual contrast
     /// </summary>
     public static void WriteOptionalFieldNotice()
     {
-        WriteColored(" *", ConsoleColor.Yellow);
-        Console.WriteLine(" = optional input, press ENTER to skip\n");
+        WriteLineColored("* = optional input, press ENTER to skip\n", ConsoleColor.Yellow);
+    }
+
+
+    /// <summary>
+    /// Displays a standard exit message with custom text.
+    /// </summary>
+    public static void ShowExitPrompt(string message)
+    {
+        Console.Write("Press ");
+        WriteColored("'0' ", ConsoleColor.Yellow);
+        Console.Write("or ");
+        WriteColored("leave blank ", ConsoleColor.Yellow);
+        Console.Write($"to {message}.\n> ");
     }
 }

@@ -3,6 +3,7 @@ using Business.Models;
 using Data.Enums;
 using Presentation.ConsoleApp.Helpers;
 
+
 namespace Presentation.ConsoleApp.Dialogs;
 
 
@@ -31,12 +32,12 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
 
 
         // Få användarens input för projektdetaljer
-        string title = InputHelper.GetUserInput(" Enter project title: ");
-        string? description = InputHelper.GetUserOptionalInput(" * Enter project description: ");
+        string title = InputHelper.GetUserInput("Enter project title: ");
+        string? description = InputHelper.GetUserOptionalInput("(optional) Enter project description: ");
 
         // Start- och slutdatum från användaren
-        DateTime startDate = GetDateInput(" Enter project start date (YYYY-MM-DD): ");
-        DateTime? endDate = GetNullableDateInput(" * Enter project end date (YYYY-MM-DD): ");
+        DateTime? startDate = GetNullableDateInput("(optional) Enter project start date (YYYY-MM-DD): ");
+        DateTime? endDate = GetNullableDateInput("(optional) Enter project end date (YYYY-MM-DD): ");
 
 
         // Lista befintliga kunder och låt användaren välja en
@@ -64,18 +65,43 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
             StartDate = startDate,
             EndDate = endDate,
             Status = selectedStatus.Value,
-            CustomerId = selectedCustomer.Id
+            CustomerId = selectedCustomer.Id,
+            CreatedDate = DateTime.UtcNow
         };
 
 
-        // Skicka projektet till service-lagret för att skapas
-        var success = await _projectService.CreateProjectAsync(form);
-
+        // Visa bekräftelse innan projektet skapas
         Console.Clear();
-        if (success)
-            ConsoleHelper.WriteLineColored("Project created successfully!", ConsoleColor.Green);
+        Console.WriteLine("----------------------------------------");
+        Console.WriteLine("-----   Confirm Project Creation   -----");
+        Console.WriteLine("----------------------------------------\n");
+
+        Console.WriteLine("--- Project details");
+        Console.WriteLine($"Title: {form.Title}");
+        Console.WriteLine($"Description: {form.Description}");
+        Console.WriteLine($"Customer: {selectedCustomer.Name}");
+        Console.WriteLine($"Start Date: {form.StartDate?.ToString("yyyy-MM-dd") ?? "Not specified"}");
+        Console.WriteLine($"End Date: {form.EndDate?.ToString("yyyy-MM-dd") ?? "Not specified"}");
+        Console.WriteLine($"Status: {StatusHelper.GetFormattedStatus(form.Status)}");
+        Console.WriteLine($"Created Date: {form.CreatedDate:yyyy-MM-dd}");
+
+        Console.Write("\nDo you want to create this project? Y to accept, or press Enter to cancel: ");
+        var confirmation = Console.ReadLine()?.Trim().ToLower();
+
+        if (confirmation == "y")
+        {
+            // Skicka projektet till service-lagret för att skapas
+            var success = await _projectService.CreateProjectAsync(form);
+            
+            if (success)
+                ConsoleHelper.WriteLineColored("\nProject created successfully!", ConsoleColor.Green);
+            else
+                ConsoleHelper.WriteLineColored("\nFailed to create project.", ConsoleColor.Red);
+        }
         else
-            ConsoleHelper.WriteLineColored("Failed to create project.", ConsoleColor.Red);
+        {
+            ConsoleHelper.WriteLineColored("Project creation cancelled.", ConsoleColor.Yellow);
+        }
 
         Console.WriteLine("\nPress any key to continue...");
         Console.ReadKey();
@@ -138,10 +164,9 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
             {
                 Console.WriteLine($"{index}. {customer.Name} ({customer.Email})");
                 index++;
-            }
+            }           
 
-            Console.Write("\nEnter customer number to choose.\n");
-            ConsoleHelper.WriteLineColored("Press '0' or leave empty to go back to the Project Menu.", ConsoleColor.Yellow);
+            ConsoleHelper.WriteLineColored("Enter a customer number to view details, or enter '0' (or leave blank) to return to Project Menu.", ConsoleColor.Yellow);
             Console.Write("> ");
             string input = Console.ReadLine()!.Trim();
 
@@ -167,7 +192,7 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
     /// </summary>
     private static ProjectStatus? SelectProjectStatus()
     {
-        var statuses = Enum.GetValues(typeof(ProjectStatus)).Cast<ProjectStatus>().ToList();
+        var statuses = Enum.GetValues<ProjectStatus>().Cast<ProjectStatus>().ToList();
         
         while (true)
         {
