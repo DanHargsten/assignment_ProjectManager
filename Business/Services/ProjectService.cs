@@ -21,11 +21,6 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
     {
         try
         {
-            // DEBUG
-            Console.WriteLine($"Debug: Trying to fetch customer with ID {form.CustomerId}");
-            ////////
-
-            // Fetch the customer from the database to ensure it exists
             var customer = await _customerRepository.GetOneAsync(x => x.Id == form.CustomerId);
             if (customer == null)
             {
@@ -33,24 +28,20 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
                 return false;
             }
 
-            // Convert the form data into a ProjectEntity
             var projectEntity = ProjectFactory.Create(form, customer);
 
-            // Ensure the projectEntity is not null before adding it to the database
             if (projectEntity == null)
             {
                 Console.WriteLine("Error: Failed to create project entity.");
                 return false;
             }
 
-            // Save the new project in the database
             await _projectRepository.AddAsync(projectEntity);
 
             return true;
         }
         catch (Exception ex)
         {
-            // Log any errors that occur during the creation process
             Console.WriteLine($"Error in CreateProjectAsync: {ex.Message}");
     
             if (ex.InnerException != null)
@@ -152,26 +143,24 @@ public class ProjectService(IProjectRepository projectRepository, ICustomerRepos
                 hasChanges = true;
             }
 
-
-            //if (!string.IsNullOrWhiteSpace(startDate) && DateTime.TryParseExact(startDate, "yyyy-mm-dd", null, System.Globalization.DateTimeStyles.None, out DateTime parsedStartDate))
+                        
             if (startDate.HasValue)
             {
                 projectEntity.StartDate = startDate.Value;
                 hasChanges = true;
             }
 
-            //if (!string.IsNullOrWhiteSpace(endDate) && DateTime.TryParseExact(endDate, "yyyy-mm-dd", null, System.Globalization.DateTimeStyles.None, out DateTime parsedEndDate))
+            
             if (endDate.HasValue)
             {
                 projectEntity.EndDate = endDate.Value;
                 hasChanges = true;
             }
 
-            //if (!string.IsNullOrWhiteSpace(status) && Enum.TryParse(status, true, out ProjectStatus parsedStatus))
-            //{
-                projectEntity.Status = status;
-                hasChanges = true;
-            //}
+
+            projectEntity.Status = status;
+            hasChanges = true;
+
 
             if (!hasChanges) return false;
 

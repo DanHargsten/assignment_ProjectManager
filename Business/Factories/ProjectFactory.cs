@@ -5,16 +5,19 @@ namespace Business.Factories;
 
 public static class ProjectFactory
 {
-    public static ProjectEntity? Create(ProjectRegistrationForm form, CustomerEntity customer) => form == null ? null : new()
+    public static ProjectEntity? Create(ProjectRegistrationForm form, CustomerEntity customer)
     {
-        Title = form.Title,
-        Description = form.Description,
-        StartDate = form.StartDate,
-        EndDate = form.EndDate,
-        Status = form.Status,
-        CustomerId = customer.Id,
-        Customer = customer
-    };
+        return form == null ? null : new()
+        {
+            Title = form.Title,
+            Description = form.Description,
+            StartDate = form.StartDate,
+            EndDate = form.EndDate,
+            Status = form.Status,
+            CustomerId = customer.Id,
+            Customer = customer
+        };
+    }
 
     public static Project? Create(ProjectEntity entity)
     {

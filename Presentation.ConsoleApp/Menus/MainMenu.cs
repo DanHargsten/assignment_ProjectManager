@@ -2,10 +2,11 @@
 
 namespace Presentation.ConsoleApp.Menus;
 
-public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
+public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu, EmployeeMenu employeeMenu)
 {
     private readonly CustomerMenu _customerMenu = customerMenu;
     private readonly ProjectMenu _projectMenu = projectMenu;
+    private readonly EmployeeMenu _employeeMenu = employeeMenu;
 
     public async Task ShowMainMenuAsync()
     {
@@ -17,7 +18,8 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
             Console.WriteLine("       PROJECT MANAGEMENT APPLICATION      ");
             Console.WriteLine("-------------------------------------------\n");
             Console.WriteLine("1. Handle Customers");
-            Console.WriteLine("2. Handle Projects\n");
+            Console.WriteLine("2. Handle Projects");
+            Console.WriteLine("3. Handle Employees\n");
 
             ConsoleHelper.ShowExitPrompt("EXIT application");
 
@@ -39,6 +41,10 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu)
 
                 case "2":
                     await _projectMenu.ShowProjectMenuAsync();
+                    break;
+
+                case "3":
+                    await _employeeMenu.ExecuteAsync();
                     break;
 
                 default:
