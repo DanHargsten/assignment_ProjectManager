@@ -19,4 +19,6 @@ public class Project
 
     public int CustomerId { get; set; }
     public string CustomerName { get; set; } = "[ERROR] Customer Missing (Fallback: Unknown)";
+
+    public IEnumerable<int> EmployeeIds { get; set; } = [];
 }

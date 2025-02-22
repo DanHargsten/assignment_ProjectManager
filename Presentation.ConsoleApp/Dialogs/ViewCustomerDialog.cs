@@ -1,24 +1,22 @@
 ﻿using Business.Interfaces;
 using Business.Models;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Presentation.ConsoleApp.Helpers;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using System.Diagnostics.Metrics;
+
 
 namespace Presentation.ConsoleApp.Dialogs;
 
 /// <summary>
 /// Handles viewing customers, including listing all customers and selecting one.
 /// </summary>
-public class ViewCustomersDialog(ICustomerService customerService, IProjectService projectService, ViewProjectsDialog viewProjectsDialog)
+public class ViewCustomersDialog(ICustomerService customerService, IProjectService projectService)
 {
     private readonly ICustomerService _customerService = customerService;
     private readonly IProjectService _projectService = projectService;
-    private readonly ViewProjectsDialog _viewProjectsDialog = viewProjectsDialog;
+
 
     #region Main Execution
     /// <summary>
-    /// Shows the main customer viewing menu.
+    /// Displays the customer list and allows selection for detailed view.
     /// </summary>
     public async Task ExecuteAsync()
     {
@@ -36,7 +34,9 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
             return;
         }
 
-        // Visa kundlista
+
+
+        // Loop för att visa kundlista och hantera val
         while (true)
         {
             Console.Clear();
@@ -46,18 +46,18 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
 
             for (int i = 0; i < customers.Count; i++)
             {
-                Console.WriteLine($"{i + 1}. {customers[i]!.Name} ({customers[i]!.Email})");
+                Console.WriteLine($"{i + 1}. {customers[i]!.Name}");
             }
 
             Console.WriteLine("\nEnter a customer number to view details.");
-            ConsoleHelper.ShowExitPrompt("to Main Menu");
+            ConsoleHelper.ShowExitPrompt("return to Customer Menu");
 
             string input = Console.ReadLine()!;
 
-            // Avsluta med tomt eller 0
+            // Exit om input är tomt eller 0
             if (string.IsNullOrWhiteSpace(input) || input == "0") return;
 
-            // Välj en kund
+            // Hantera kundval
             if (int.TryParse(input, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= customers.Count)
             {
                 var selectedCustomer = customers[selectedIndex - 1]!;
@@ -87,18 +87,19 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
         Console.WriteLine("              CUSTOMER DETAILS             ");
         Console.WriteLine("-------------------------------------------\n");
 
-        Console.WriteLine($"Name: ".PadRight(10) + $"{ customer.Name}");
-        Console.WriteLine($"Email: ".PadRight(10) + $"{ customer.Email}");
-        Console.WriteLine($"Phone: ".PadRight(10) + $"{ customer.PhoneNumber}");
+        Console.WriteLine($"ID:".PadRight(15) + $"{customer.Id}");
+        Console.WriteLine($"Name:".PadRight(15) + $"{customer.Name}");
+        Console.WriteLine($"Email:".PadRight(15) + $"{(!string.IsNullOrWhiteSpace(customer.Email) ? customer.Email : "No email provided")}");
+        Console.WriteLine($"Phone:".PadRight(15) + $"{(!string.IsNullOrWhiteSpace(customer.PhoneNumber) ? customer.PhoneNumber : "No phone number provided")}");
 
-
+        
         // Hämta och visa kundens aktiva projekt
         var projects = (await _projectService.GetProjectsByCustomerIdAsync(customer.Id)).ToList();
 
         if (projects.Count > 0)
         {
             Console.WriteLine("\n-------------------------------------------");
-            Console.WriteLine("              Active Projects              ");
+            Console.WriteLine("              ACTIVE PROJECTS              ");
             Console.WriteLine("-------------------------------------------\n");
 
             int index = 1;
@@ -110,15 +111,21 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
 
             Console.WriteLine("\n-------------------------------------------");
 
+
+            // Loop för att visa projektlista och hantera val
             while (true)
             {
                 Console.WriteLine("\nEnter a project number to view details.");
                 ConsoleHelper.ShowExitPrompt("return to Customer Menu.");
 
-                string input = Console.ReadLine()!.Trim();
-                if (string.IsNullOrWhiteSpace(input) || input == "0")
-                    return;
 
+                string input = Console.ReadLine()!.Trim();
+
+                // Exit om input är tomt eller 0
+                if (string.IsNullOrWhiteSpace(input) || input == "0") return;
+
+
+                // Hantera projektval
                 if (int.TryParse(input, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= projects.Count)
                 {
                     var selectedProject = projects[selectedIndex -1];
@@ -133,11 +140,11 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
         }     
         else
         {
-                Console.WriteLine("\nNo active projects.\n");
-                ConsoleHelper.ShowExitPrompt("return to Customer Menu");
-                Console.ReadKey();
+            Console.WriteLine("\nNo active projects.");
+            Console.WriteLine("\n-------------------------------------------\n");
+            ConsoleHelper.ShowExitPrompt("return to Customer Menu");
+            Console.ReadKey();
         }
-    }
-    
+    }    
     #endregion
 }

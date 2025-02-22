@@ -1,13 +1,15 @@
 ﻿using Business.Interfaces;
 using Business.Models;
 using Data.Enums;
+using Presentation.ConsoleApp.Dialogs;
 using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Menus;
 
-public class EmployeeMenu(IEmployeeService employeeService)
+public class EmployeeMenu(IEmployeeService employeeService, CreateEmployeeDialog createEmployeeDialog)
 {
     private readonly IEmployeeService _employeeService = employeeService;
+    private readonly CreateEmployeeDialog _createEmployeeDialog = createEmployeeDialog;
 
     public async Task ExecuteAsync()
     {
@@ -15,19 +17,25 @@ public class EmployeeMenu(IEmployeeService employeeService)
         {
             Console.Clear();
             Console.WriteLine("-------------------------------------------");
-            Console.WriteLine("              EMPLOYEE MANAGEMENT          ");
+            Console.WriteLine("            EMPLOYEES MANAGEMENT           ");
             Console.WriteLine("-------------------------------------------\n");
             Console.WriteLine("1. Add New Employee");
             Console.WriteLine("2. View All Employees");
             Console.WriteLine("3. View Employee Details");
-            Console.WriteLine("0. Return to Main Menu");
-            Console.Write("\nSelect an option: ");
 
-            string? input = Console.ReadLine();
-            switch (input)
+            ConsoleHelper.ShowExitPrompt("return to Main Menu");
+            Console.Write("Select an option: ");
+
+            string option = Console.ReadLine()!.Trim();
+            if (string.IsNullOrWhiteSpace(option))
+            {
+                return;
+            }
+
+            switch (option)
             {
                 case "1":
-                    await AddEmployeeAsync();
+                    await _createEmployeeDialog.ExecuteAsync();
                     break;
                 case "2":
                     await ViewAllEmployeesAsync();
@@ -45,36 +53,7 @@ public class EmployeeMenu(IEmployeeService employeeService)
         }
     }
 
-    private async Task AddEmployeeAsync()
-    {
-        Console.Clear();
-        Console.WriteLine("---- ADD NEW EMPLOYEE ----\n");
-        ConsoleHelper.WriteOptionalFieldNotice();
-
-        // Användarinput
-        string firstName = InputHelper.GetUserInput("Enter first name: ");
-        string lastName = InputHelper.GetUserInput("Enter last name: ");
-        string? email = InputHelper.GetUserOptionalInput("(optional) Enter email: ");
-        string? phone = InputHelper.GetUserOptionalInput("(optional) Enter phone: ");
-
-        // Rollval (använder en separat metod för att strukturera koden bättre)
-        var selectedRole = SelectEmployeeRole();
-        if (selectedRole == null) return;
-
-        // Skapa formuläret
-        var form = new EmployeeRegistrationForm
-        {
-            FirstName = firstName,
-            LastName = lastName,
-            Email = email,
-            Phone = phone,
-            Role = selectedRole!.Value
-        };
-
-        bool success = await _employeeService.CreateEmployeeAsync(form);
-        Console.WriteLine(success ? "\nEmployee added successfully!" : "\nFailed to add employee.");
-        Console.ReadKey();
-    }
+  
 
     private async Task ViewAllEmployeesAsync()
     {
@@ -134,24 +113,5 @@ public class EmployeeMenu(IEmployeeService employeeService)
 
 
 
-    private EmployeeRole? SelectEmployeeRole()
-    {
-        Console.WriteLine("\nSelect a role:");
-        foreach (var role in Enum.GetValues(typeof(EmployeeRole)))
-        {
-            Console.WriteLine($"{(int)role}. {role}");
-        }
-
-        Console.Write("\nEnter a number: ");
-        bool validInput = int.TryParse(Console.ReadLine(), out int roleInput) && Enum.IsDefined(typeof(EmployeeRole), roleInput);
-
-        if (!validInput)
-        {
-            Console.WriteLine("\nInvalid selection. Press any key to return...");
-            Console.ReadKey();
-            return null;
-        }
-
-        return (EmployeeRole)roleInput;
-    }
+    
 }

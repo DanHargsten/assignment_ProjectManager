@@ -11,44 +11,64 @@ public class CreateCustomerDialog(ICustomerService customerService)
 {
     private readonly ICustomerService _customerService = customerService;
 
-    #region Main Execution
+
     /// <summary>
-    /// Handles user input to create a new customer.
-    /// Uses CustomerService to perform the actual creation.
+    /// Guides the user through the process of creating a new customer.
+    /// It collects input, validates it, and passes it to CustomerService for processing.
     /// </summary>
     public async Task ExecuteAsync()
     {
         Console.Clear();
-        Console.WriteLine("-------------------------------------");
-        Console.WriteLine("------   CREATE NEW CUSTOMER   ------");
-        Console.WriteLine("-------------------------------------");
-        ConsoleHelper.WriteOptionalFieldNotice();     
-        
-        // Hämta inmatning från användaren
-        string name = InputHelper.GetUserInput("Enter Customer Name: ");
-        string? email = InputHelper.GetUserOptionalInput("* Enter Customer Email: ");
-        string? phone = InputHelper.GetUserOptionalInput("* Enter Customer Phone Number: ");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("              CREATE CUSTOMER              ");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("Fill in the fields below to add a new customer.\n");
 
-        // Skapa formulär för att registrera kunden
-        var form = new CustomerRegistrationForm
-        {
-            Name = name,
-            Email = email,
-            PhoneNumber = phone
-        };
+        // Hämta användarinmatning
+        string name = InputHelper.GetUserInput("Enter customer name: ");
+        string? email = InputHelper.GetUserOptionalInput("(Optional) Enter customer email: ");
+        string? phone = InputHelper.GetUserOptionalInput("(Optional) Enter customer phone number: ");
 
-        // Skicka formuläret till CustomerService för att skapa kunden
-        var success = await _customerService.CreateCustomerAsync(form);
-
+        // Visa en sammanfattning av den nya kunden
         Console.Clear();
-        Console.ForegroundColor = success ? ConsoleColor.Green : ConsoleColor.Red;       
-        Console.WriteLine(success ? "Customer created successfully!" : "Failed to create customer.");
-        Console.ResetColor();
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("          REVIEW CUSTOMER DETAILS          ");
+        Console.WriteLine("-------------------------------------------\n");
 
-        Console.Write("\nPress any key to return to the ");
-        ConsoleHelper.WriteColored("Customer Menu", ConsoleColor.Yellow);
-        Console.WriteLine("...");
+        Console.WriteLine($"Name:".PadRight(15) + $"{name}");
+        Console.WriteLine($"Email:".PadRight(15) + $"{(!string.IsNullOrWhiteSpace(email) ? email : "No email provided")}");
+        Console.WriteLine($"Phone:".PadRight(15) + $"{(!string.IsNullOrWhiteSpace(phone) ? phone : "No phone provided")}");
+
+        Console.Write("\nAre the details correct? Press Y to confirm, or Enter to cancel: ");
+        var confirmation = Console.ReadLine()?.Trim().ToLower();
+
+        // Om användaren bekräftar skapas kunden
+        if (confirmation == "y")
+        {
+            // Skapa registreringsformuläret
+            var form = new CustomerRegistrationForm
+            {
+                Name = name,
+                Email = email,
+                PhoneNumber = phone
+            };
+
+            // Skicka kunden till service-lagret för att skapas
+            bool success = await _customerService.CreateCustomerAsync(form);
+            
+            if (success)
+                ConsoleHelper.WriteLineColored("\nCustomer created successfully!", ConsoleColor.Green);
+            else
+                ConsoleHelper.WriteLineColored("\nFailed to create customer.", ConsoleColor.Red);
+        }
+        else
+        {
+            ConsoleHelper.WriteLineColored("\nCustomer creation cancelled.", ConsoleColor.Yellow);
+        }
+
+
+        // Visa utgångsmeddelande
+        ConsoleHelper.ShowExitPrompt("return to the Customer Menu");
         Console.ReadKey();
     }
-    #endregion
 }

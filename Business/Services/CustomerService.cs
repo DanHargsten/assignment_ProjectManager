@@ -82,8 +82,12 @@ public class CustomerService(ICustomerRepository customerRepository) : ICustomer
                 customerEntity.Name = name;
                 hasChanges = true;
             }
-            if (!string.IsNullOrWhiteSpace(email))
+            if (!string.IsNullOrWhiteSpace(email) && email != customerEntity.Email)
             {
+                var existingCustomer = await _customerRepository.GetOneAsync(c => c.Email == email && c.Id != id);
+                if (existingCustomer != null)
+                    return false;
+
                 customerEntity.Email = email;
                 hasChanges = true;
             }

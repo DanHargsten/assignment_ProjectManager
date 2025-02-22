@@ -20,20 +20,21 @@ public class CustomerMenu(CreateCustomerDialog createCustomerDialog, ViewCustome
         while (true)
         {
             Console.Clear();
-            Console.WriteLine("------------------------------------------");
-            Console.WriteLine("            CUSTOMER MANAGEMENT           ");
-            Console.WriteLine("------------------------------------------\n");
-            Console.WriteLine("Pick an option below.");
+            Console.WriteLine("-------------------------------------------");
+            Console.WriteLine("            CUSTOMER MANAGEMENT            ");
+            Console.WriteLine("-------------------------------------------\n");
+
             Console.WriteLine("1. Add New Customer");
             Console.WriteLine("2. View All Customers");
             Console.WriteLine("3. Update a Customer");
             Console.WriteLine("4. Delete a Customer\n");
 
             ConsoleHelper.ShowExitPrompt("return to Main Menu");
+            Console.Write("Select an option: ");
 
             string option = Console.ReadLine()!.Trim();
 
-            if (string.IsNullOrWhiteSpace(option) || option == "0")
+            if (string.IsNullOrWhiteSpace(option))
             {
                 return;
             }
@@ -54,9 +55,8 @@ public class CustomerMenu(CreateCustomerDialog createCustomerDialog, ViewCustome
                     break;
 
                 default:
-                    Console.ForegroundColor = ConsoleColor.Red;
-                    Console.WriteLine("Invalid input. Try again.");
-                    Console.ResetColor();
+                    ConsoleHelper.WriteLineColored("\nInvalid input. Press any key to try again.", ConsoleColor.Red);  
+                    Console.ReadKey();
                     break;
             }
         }

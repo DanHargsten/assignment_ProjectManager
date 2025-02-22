@@ -31,6 +31,10 @@ public class CustomerServiceTests
 
 
 
+    // ===========================================
+    //               CREATE CUSTOMER
+    // ===========================================
+
     /// <summary>
     /// Ensures that creating a new customer adds it to the database.
     /// </summary>
@@ -42,8 +46,8 @@ public class CustomerServiceTests
         var service = await GetCustomerServiceAsync();
         var customerForm = new CustomerRegistrationForm
         {
-            Name = "John Doe",
-            Email = "john.doe@domain.com",
+            Name = "Dan Hargsten",
+            Email = "dan.hargsten@domain.com",
             PhoneNumber = "123456789"
         };
 
@@ -56,12 +60,38 @@ public class CustomerServiceTests
         Assert.Single(customers);
         Assert.Contains(customers, c =>
             c != null &&
-            c.Name == "John Doe" &&
-            (c.Email ?? "") == "john.doe@domain.com" &&
+            c.Name == "Dan Hargsten" &&
+            (c.Email ?? "") == "dan.hargsten@domain.com" &&
             (c.PhoneNumber ?? "") == "123456789");
     }
 
 
+
+    /// <summary>
+    /// Ensures that a customer can be created without an email.
+    /// </summary>
+    [Fact]
+    public async Task CreateCustomerAsync_ShouldSucceed_WithoutEmail()
+    {
+        // Arrange
+        var service = await GetCustomerServiceAsync();
+        var customerForm = new CustomerRegistrationForm { Name = "No Email Customer", Email = null };
+
+        // Act
+        bool result = await service.CreateCustomerAsync(customerForm);
+        var customers = await service.GetCustomersAsync();
+
+        // Assert
+        Assert.True(result);
+        Assert.Contains(customers, c => c!.Name == "No Email Customer" && string.IsNullOrWhiteSpace(c.Email));
+    }
+
+
+
+
+    // ===========================================
+    //              READ CUSTOMERS
+    // ===========================================
 
     /// <summary>
     /// Ensures that retrieving customers returns an empty list when no customers exist.
@@ -82,6 +112,12 @@ public class CustomerServiceTests
 
 
 
+
+
+    // ===========================================
+    //             UPDATE CUSTOMER
+    // ===========================================
+
     /// <summary>
     /// Ensures that updating an existing customer correctly modifies their details.
     /// </summary>
@@ -92,8 +128,8 @@ public class CustomerServiceTests
         var service = await GetCustomerServiceAsync();
         var customerForm = new CustomerRegistrationForm
         {
-            Name = "Ace",
-            Email = "ace@domain.com",
+            Name = "nad",
+            Email = "nad@domain.com",
             PhoneNumber = "123456789"
         };
         
@@ -103,16 +139,42 @@ public class CustomerServiceTests
         Assert.NotNull(customer);
 
         // Act
-        bool result = await service.UpdateCustomerAsync(customer!.Id, "Acme", "acme@domain.com", "987654321");
+        bool result = await service.UpdateCustomerAsync(customer!.Id, "Dan", "dan@domain.com", "987654321");
         var updatedCustomer = (await service.GetCustomersAsync()).FirstOrDefault(c => c!.Id == customer.Id);
-        Assert.NotNull(updatedCustomer);
 
         // Assert
         Assert.True(result);
         Assert.NotNull(updatedCustomer);
-        Assert.Equal("Acme", updatedCustomer!.Name);
-        Assert.Equal("acme@domain.com", updatedCustomer.Email);
+        Assert.Equal("Dan", updatedCustomer!.Name);
+        Assert.Equal("dan@domain.com", updatedCustomer.Email);
         Assert.Equal("987654321", updatedCustomer.PhoneNumber);
+    }
+
+
+
+
+    /// <summary>
+    /// Ensures that updating a customer's email to an existing one fails.
+    /// </summary>
+    [Fact]
+    public async Task UpdateCustomerAsync_ShouldFail_WhenEmailAlreadyExists()
+    {
+        // Arrange
+        var service = await GetCustomerServiceAsync();
+
+        var customer1 = new CustomerRegistrationForm { Name = "First Customer", Email = "test@domain.com" };
+        var customer2 = new CustomerRegistrationForm { Name = "Second Customer", Email = "second@domain.com" };
+
+        await service.CreateCustomerAsync(customer1);
+        await service.CreateCustomerAsync(customer2);
+
+        var customerToUpdate = (await service.GetCustomersAsync()).LastOrDefault()!;
+
+        // Act
+        bool result = await service.UpdateCustomerAsync(customerToUpdate.Id, "Updated Name", "test@domain.com", "123456789");
+
+        // Assert
+        Assert.False(result);
     }
 
 
@@ -135,6 +197,11 @@ public class CustomerServiceTests
 
 
 
+
+    // ===========================================
+    //               DELETE CUSTOMER
+    // ===========================================
+
     /// <summary>
     /// Ensures that a customer can be successfully removed.
     /// </summary>
@@ -143,7 +210,7 @@ public class CustomerServiceTests
     {
         // Arrange
         var service = await GetCustomerServiceAsync();
-        var customerForm = new CustomerRegistrationForm { Name = "Jane Doe", Email = "jane.doe@domain.com", PhoneNumber = "987654321" };
+        var customerForm = new CustomerRegistrationForm { Name = "Dan Hargsten", Email = "dan.hargsten@domain.com", PhoneNumber = "987654321" };
         await service.CreateCustomerAsync(customerForm);
         var customer = (await service.GetCustomersAsync()).FirstOrDefault() ?? throw new InvalidOperationException("..");
 

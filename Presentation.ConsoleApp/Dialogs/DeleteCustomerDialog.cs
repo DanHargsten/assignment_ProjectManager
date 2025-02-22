@@ -7,31 +7,30 @@ namespace Presentation.ConsoleApp.Dialogs;
 
 /// <summary>
 /// Handles deleting a customer.
-/// Only allows deletion if all related projects are completed.
+/// Allows deletion only if all related projects are completed.
 /// </summary>
 public class DeleteCustomerDialog(ICustomerService customerService, IProjectService projectService)
 {
     private readonly ICustomerService _customerService = customerService;
     private readonly IProjectService _projectService = projectService;
 
-    
-    #region Main Execution
 
+    #region Main Execution
     /// <summary>
-    /// Lists customers and prompts the user to delete one.
-    /// Only allows deletion if all related projects are completed.
+    /// Displays a list of customers and prompts the user to select one for deletion.
+    /// Verifies that all related projects are completed before deletion.
     /// </summary>
     public async Task ExecuteAsync()
     {
         Console.Clear();
-        Console.WriteLine("--------------------------------------");
-        Console.WriteLine("--------   DELETE CUSTOMER   --------");
-        Console.WriteLine("--------------------------------------\n");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("              DELETE CUSTOMER              ");
+        Console.WriteLine("-------------------------------------------\n");
 
         // Hämtar alla kunder
         var customers = (await _customerService.GetCustomersAsync()).ToList();
 
-        // Om inga kunder finns, informera användaren
+        // Informera användaren om att inga kunder hittades
         if (customers.Count == 0)
         {
             ConsoleHelper.WriteLineColored("No customers found.", ConsoleColor.Yellow);
@@ -42,18 +41,22 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
             return;
         }
 
-        // Välj en kund att radera
+        // Låt användaren välja en kund att ta bort
         var customer = SelectCustomer(customers);
-        if (customer == null) return;
+        if (customer == null)
+        {
+            return;
+        }
 
-        // Hämtar alla projekt kopplade till kunden och hanterar aktiva projekt
+        // Hämta alla projekt kopplade till kunden och hantera aktiva projekt
         var projects = await _projectService.GetProjectsByCustomerIdAsync(customer.Id);
         await HandleActiveProjects(projects);
 
-        // Bekräftar om användaren fortfarande vill ta bort kunden
+        // Bekräfta borttagning av kunden
         bool confirmed = ConfirmCustomerDeletion(customer, projects);
         if (!confirmed) return;
 
+        // Försök ta bort kunden via CustomerService
         bool success = await _customerService.RemoveCustomerAsync(customer.Id);
 
 
@@ -65,26 +68,28 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
         else
         {
             ConsoleHelper.WriteLineColored("Failed to delete customer.", ConsoleColor.Green);
-        } 
+        }
 
-        Console.WriteLine("\nPress any key to continue...");
+        ConsoleHelper.ShowExitPrompt("return to Customer Menu");
         Console.ReadKey();
     }
-
     #endregion
 
 
 
-    #region Helper Methods
 
+
+
+
+    #region Helper Methods
     /// <summary>
-    /// Displays a list of customers and allows the user to select one.
+    /// Displays a numbered list of customers and allows the user to select one to delete.
     /// </summary>
-    /// <param name="customers"></param>
-    /// <returns></returns>
+    /// <param name="customers">The list of available customers.</param>
+    /// <returns>The selected customer, or null if an invalid selection was made.</returns>
     private static Customer? SelectCustomer(List<Customer?> customers)
     {
-        // Skriver ut alla kunder
+        // Skriv ut listan med kunder
         for (int i = 0; i < customers.Count; i++)
         {
             Console.WriteLine($"{i + 1}. {customers[i]!.Name}");
@@ -92,8 +97,9 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
 
         Console.Write("\nEnter customer number to delete: ");
 
-        // Säkerställer att användaren valt ett giltigt kund-index
-        if (int.TryParse(Console.ReadLine(), out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= customers.Count)
+        // Kontrollera att användaren valt ett giltigt index
+        if (int.TryParse(Console.ReadLine(), out int selectedIndex) &&
+            selectedIndex >= 1 && selectedIndex <= customers.Count)
         {
             return customers[selectedIndex - 1]!;
         }
@@ -105,8 +111,10 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
 
 
     /// <summary>
-    /// Ensures all active or pending projects are marked as completed before deleting a customer.
+    /// Handles active or pending projects for the selected customer by allowing the user to mark them as completed.
     /// </summary>
+    /// <param name="projects">The list of customer's projects.</param>
+
     private async Task HandleActiveProjects(IEnumerable<Project> projects)
     {
         var activeProjects = projects.Where(x => x.Status != ProjectStatus.Completed).ToList();
@@ -116,23 +124,29 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
             Console.Clear();
             ConsoleHelper.WriteLineColored("This customer has active or pending projects:", ConsoleColor.Yellow);
 
-            // Skriver ut alla projekt som inte är slutförda
+            
+            // Lista de projekt som inte är slutförda
             for (int i = 0; i < activeProjects.Count; i++)
             {
                 Console.WriteLine($"{i + 1}. {activeProjects[i].Title} ({StatusHelper.GetFormattedStatus(activeProjects[i].Status)})");
             }
 
+
             Console.Write("\nPick a project to mark as completed (or press ENTER to cancel): ");
             string projectInput = Console.ReadLine()!.Trim();
-            if (string.IsNullOrWhiteSpace(projectInput)) return;
+            if (string.IsNullOrWhiteSpace(projectInput))
+            {
+                return;
+            }
 
-            // Säkerställer att användaren valt ett giltigt projekt-index
-            if (int.TryParse(projectInput, out int projectIndex) && projectIndex >= 1 && projectIndex <= activeProjects.Count)
+            // Kontrollera att ett giltigt projektnummer angivits
+            if (int.TryParse(projectInput, out int projectIndex) &&
+                projectIndex >= 1 && projectIndex <= activeProjects.Count)
             {
                 var selectedProject = activeProjects[projectIndex - 1];
                 await MarkProjectAsCompleted(selectedProject);
 
-                // Uppdaterar listan av aktiva projekt
+                // Uppdatera listan med aktiva projekt
                 activeProjects = projects.Where(p => p.Status != ProjectStatus.Completed).ToList();
             }
             else
@@ -145,8 +159,9 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
 
 
     /// <summary>
-    /// Marks a project as completed.
+    /// Marks a selected project as completed.
     /// </summary>
+    /// <param name="project">The project to be marked as completed.</param>
     private async Task MarkProjectAsCompleted(Project project)
     {
         Console.Clear();
@@ -166,7 +181,8 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
                 project.Description,
                 project.StartDate,
                 project.EndDate,
-                ProjectStatus.Completed
+                ProjectStatus.Completed,
+                project.EmployeeIds.ToList()
             );
 
             ConsoleHelper.WriteLineColored("\nProject marked as completed.", ConsoleColor.Green);
@@ -179,6 +195,9 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
     /// <summary>
     /// Asks for final confirmation before deleting a customer.
     /// </summary>
+    /// <param name="customer">The customer to be deleted.</param>
+    /// <param name="projects">The customer's projects.</param>
+    /// <returns>True if deletion is confirmed, otherwise false.</returns>
     private static bool ConfirmCustomerDeletion(Customer customer, IEnumerable<Project> projects)
     {
         if (projects.Any())
@@ -193,6 +212,5 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
 
         return confirmation == "yes";
     }
-
     #endregion
 }

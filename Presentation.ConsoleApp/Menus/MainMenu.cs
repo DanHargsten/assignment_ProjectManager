@@ -17,15 +17,17 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu, Employ
             Console.WriteLine("-------------------------------------------");
             Console.WriteLine("       PROJECT MANAGEMENT APPLICATION      ");
             Console.WriteLine("-------------------------------------------\n");
+
             Console.WriteLine("1. Handle Customers");
             Console.WriteLine("2. Handle Projects");
             Console.WriteLine("3. Handle Employees\n");
 
-            ConsoleHelper.ShowExitPrompt("EXIT application");
+            ConsoleHelper.ShowExitPrompt("exit application");
+            Console.Write("Select an option: ");
 
             string option = Console.ReadLine()!.Trim();
 
-            if (string.IsNullOrWhiteSpace(option) || option == "0")
+            if (string.IsNullOrWhiteSpace(option))
             {
                 Console.Clear();
                 Console.WriteLine("Exiting application...");

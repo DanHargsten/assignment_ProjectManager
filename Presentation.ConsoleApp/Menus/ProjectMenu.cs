@@ -22,18 +22,18 @@ public class ProjectMenu(CreateProjectDialog createProjectDialog, ViewProjectsDi
             Console.WriteLine("-------------------------------------------");
             Console.WriteLine("             PROJECT MANAGEMENT            ");
             Console.WriteLine("-------------------------------------------\n");
-            Console.WriteLine("Pick an option below");
+
             Console.WriteLine("1. Add New Project");
             Console.WriteLine("2. View All Projects");
             Console.WriteLine("3. Update a Project");
             Console.WriteLine("4. Delete a Project\n");
 
-            ConsoleHelper.WriteLineColored("Press '0' or leave empty to go back to Main Menu.", ConsoleColor.Yellow);
-
-            Console.Write("> ");
+            ConsoleHelper.ShowExitPrompt("return to Main Menu");
+            Console.Write("Select an option: ");
+  
             string option = Console.ReadLine()!.Trim();
 
-            if (string.IsNullOrWhiteSpace(option) || option == "0")
+            if (string.IsNullOrWhiteSpace(option))
             {
                 return;
             }
@@ -51,6 +51,11 @@ public class ProjectMenu(CreateProjectDialog createProjectDialog, ViewProjectsDi
                     break;
                 case "4":
                     await _deleteProjectDialog.ExecuteAsync();
+                    break;
+
+                default:
+                    ConsoleHelper.WriteLineColored("\nInvalid input. Press any key to try again.", ConsoleColor.Red);
+                    Console.ReadKey();
                     break;
             }
         }

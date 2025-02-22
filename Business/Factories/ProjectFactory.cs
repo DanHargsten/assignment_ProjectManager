@@ -31,7 +31,8 @@ public static class ProjectFactory
             Status = entity.Status,
             CustomerId = entity.CustomerId,
             CustomerName = entity.Customer?.Name ?? "[ERROR] Customer Missing (Fallback: Unknown)",
-            CreatedDate = entity.CreatedDate            
+            CreatedDate = entity.CreatedDate,
+            EmployeeIds = entity.ProjectEmployees?.Select(pe => pe.EmployeeId).ToList() ?? []
         };
     }
 }

@@ -30,6 +30,11 @@ public class EmployeeServiceTests
 
 
 
+
+    // ===========================================
+    //              CREATE EMPLOYEE
+    // ===========================================
+
     /// <summary>
     /// Ensures that creating a new employee adds it to the database.
     /// </summary>
@@ -65,6 +70,11 @@ public class EmployeeServiceTests
 
 
 
+
+    // ===========================================
+    //              VIEW EMPLOYEES
+    // ===========================================
+
     /// <summary>
     /// Ensures that retrieving employees returns an empty list when no employees exist.
     /// </summary>
@@ -84,6 +94,11 @@ public class EmployeeServiceTests
 
 
 
+
+    // ===========================================
+    //              UPDATE EMPLOYEE
+    // ===========================================
+
     /// <summary>
     /// Ensures that updating an existing employee correctly modifies their details.
     /// </summary>
@@ -94,9 +109,9 @@ public class EmployeeServiceTests
         var service = await GetEmployeeServiceAsync();
         var employeeForm = new EmployeeRegistrationForm
         {
-            FirstName = "Ace",
-            LastName = "Smith",
-            Email = "ace@domain.com",
+            FirstName = "John",
+            LastName = "Doe",
+            Email = "john.doe@domain.com",
             Phone = "123456789",
             Role = EmployeeRole.Manager
         };
@@ -106,18 +121,62 @@ public class EmployeeServiceTests
         Assert.NotNull(employee);
 
         // Act
-        bool result = await service.UpdateEmployeeAsync(employee!.Id, "Acme", "Smith", "acme@domain.com", "987654321", EmployeeRole.Designer);
+        bool result = await service.UpdateEmployeeAsync(employee!.Id, "Jane", "Doe", "jane.doe@domain.com", "987654321", EmployeeRole.Designer);
         var updatedEmployee = (await service.GetEmployeesAsync()).FirstOrDefault(e => e!.Id == employee.Id);
         Assert.NotNull(updatedEmployee);
 
         // Assert
         Assert.True(result);
-        Assert.Equal("Acme", updatedEmployee!.FirstName);
-        Assert.Equal("acme@domain.com", updatedEmployee.Email);
+        Assert.Equal("Jane", updatedEmployee!.FirstName);
+        Assert.Equal("jane.doe@domain.com", updatedEmployee.Email);
         Assert.Equal("987654321", updatedEmployee.Phone);
         Assert.Equal(EmployeeRole.Designer, updatedEmployee.Role);
     }
 
+
+    /// <summary>
+    /// Ensures that updating an employee to an invalid role fails.
+    /// </summary>
+    [Fact]
+    public async Task UpdateEmployeeAsync_ShouldFail_WhenInvalidRoleIsGiven()
+    {
+        // Arrange
+        var service = await GetEmployeeServiceAsync();
+        var employeeForm = new EmployeeRegistrationForm { FirstName = "Test", LastName = "User", Role = EmployeeRole.Developer };
+
+        await service.CreateEmployeeAsync(employeeForm);
+        var employee = (await service.GetEmployeesAsync()).FirstOrDefault()!;
+
+        // Act
+        bool result = await service.UpdateEmployeeAsync(employee.Id, "Updated", "User", "updated@domain.com", "987654321", (EmployeeRole)999);
+
+        // Assert
+        Assert.False(result);
+    }
+
+
+    /// <summary>
+    /// Ensures that updating an employee's role is successful.
+    /// </summary>
+    [Fact]
+    public async Task UpdateEmployeeAsync_ShouldUpdateRoleSuccessfully()
+    {
+        // Arrange
+        var service = await GetEmployeeServiceAsync();
+        var employeeForm = new EmployeeRegistrationForm { FirstName = "Dan", LastName = "Hargsten", Role = EmployeeRole.Developer };
+
+        await service.CreateEmployeeAsync(employeeForm);
+        var employee = (await service.GetEmployeesAsync()).FirstOrDefault()!;
+
+        // Act
+        bool result = await service.UpdateEmployeeAsync(employee.Id, "Dan", "Hargsten", "dh@domain.com", "555-1234", EmployeeRole.Manager);
+        var updatedEmployee = (await service.GetEmployeesAsync()).FirstOrDefault(e => e!.Id == employee.Id);
+
+        // Assert
+        Assert.True(result);
+        Assert.NotNull(updatedEmployee);
+        Assert.Equal(EmployeeRole.Manager, updatedEmployee!.Role);
+    }
 
 
     /// <summary>
@@ -137,6 +196,11 @@ public class EmployeeServiceTests
     }
 
 
+
+
+    // ===========================================
+    //              DELETE EMPLOYEE
+    // ===========================================
 
     /// <summary>
     /// Ensures that an employee can be successfully removed.
@@ -166,7 +230,6 @@ public class EmployeeServiceTests
         Assert.True(result);
         Assert.Empty(employees);
     }
-
 
 
     /// <summary>

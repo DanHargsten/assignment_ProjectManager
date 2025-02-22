@@ -78,6 +78,9 @@ public class EmployeeService(IEmployeeRepository employeeRepository) : IEmployee
             if (employeeEntity == null)
                 return false;
 
+            if (!Enum.IsDefined(role))
+                return false;
+
             bool hasChanges = false;
 
             if (!string.IsNullOrWhiteSpace(firstName))

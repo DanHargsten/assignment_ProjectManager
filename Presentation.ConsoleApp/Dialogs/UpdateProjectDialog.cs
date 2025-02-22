@@ -1,7 +1,9 @@
 ﻿using Business.Interfaces;
 using Business.Models;
+using Business.Services;
 using Data.Enums;
 using Presentation.ConsoleApp.Helpers;
+using System.Net.Http.Headers;
 
 namespace Presentation.ConsoleApp.Dialogs;
 
@@ -10,9 +12,10 @@ namespace Presentation.ConsoleApp.Dialogs;
 /// Handles the process of updating an existing project.
 /// Lists all projects, allows the user to select one, and updates the details.
 /// </summary>
-public class UpdateProjectDialog(IProjectService projectService)
+public class UpdateProjectDialog(IProjectService projectService, IEmployeeService employeeService)
 {
     private readonly IProjectService _projectService = projectService;
+    private readonly IEmployeeService _employeeService = employeeService;
 
 
     /// <summary>
@@ -89,7 +92,8 @@ public class UpdateProjectDialog(IProjectService projectService)
         Console.WriteLine($"End Date: {selectedProject.EndDate?.ToString("yyyy-MM-dd") ?? "N/A"}");
         Console.WriteLine($"Current Status: {StatusHelper.GetFormattedStatus(selectedProject.Status)}");
 
-        Console.WriteLine("\n** Leave fields empty to keep current values **");
+        Console.WriteLine("\n-------------------------------------------");
+        ConsoleHelper.WriteLineColored("\nLeave fields empty to keep current values\n", ConsoleColor.Yellow);
 
         // Hämtar användarens uppdateringar, behåller nuvarande värden om fälten lämnas tomma
         string newTitle = GetUserInput($"New Title: ", selectedProject.Title);
@@ -101,8 +105,11 @@ public class UpdateProjectDialog(IProjectService projectService)
         DateTime? newEndDate = string.IsNullOrWhiteSpace(newEndDateInput) ? selectedProject.EndDate : DateTime.Parse(newEndDateInput);
         ProjectStatus newStatus = GetValidStatusInput($"New Status: ", selectedProject.Status);
 
+        // Hantera anställda
+        List<int>? newEmployeeIds = await SelectEmployeesForProjectAsync(selectedProject);
+
         // Uppdaterar projektet via ProjectService
-        bool success = await _projectService.UpdateProjectAsync(selectedProject.Id, newTitle, newDescription, newStartDate, newEndDate, newStatus);
+        bool success = await _projectService.UpdateProjectAsync(selectedProject.Id, newTitle, newDescription, newStartDate, newEndDate, newStatus, newEmployeeIds);
         Console.Clear();
 
         if (success)
@@ -192,5 +199,72 @@ public class UpdateProjectDialog(IProjectService projectService)
             Console.WriteLine("\nInvalid selection. Please enter a valid number.");
             Console.ResetColor();
         }
+    }
+
+
+
+
+
+
+    /// <summary>
+    /// Prompts user to select employees for the project.
+    /// </summary>
+    /// <returns>Returns a list of selected employee IDs.</returns>
+    private async Task<List<int>> SelectEmployeesForProjectAsync(Project selectedProject)
+    {
+        Console.Clear();
+        Console.Write("\nDo you want to update the assigned employees? (Y/N): ");
+        var input = Console.ReadLine()?.Trim().ToLower();
+        if (input != "y") return selectedProject.EmployeeIds?.ToList() ?? [];
+
+        // Hämta alla anställda
+        var employees = (await _employeeService.GetEmployeesAsync()).ToList();
+        if (employees.Count == 0)
+        {
+            ConsoleHelper.WriteLineColored("No employees available.", ConsoleColor.Yellow);
+            ConsoleHelper.ShowExitPrompt("return to Project Menu");
+            Console.ReadKey();
+            return selectedProject.EmployeeIds?.ToList() ?? [];
+        }
+
+        var selectedEmployeeIds = selectedProject.EmployeeIds?.ToList() ?? [];
+
+        while (true)
+        {
+            Console.Clear();
+            Console.WriteLine("-------------------------------------------");
+            Console.WriteLine("       SELECT EMPLOYEES FOR PROJECT        ");
+            Console.WriteLine("-------------------------------------------\n");
+
+            // Visa alla anställda i en lista
+            for (int i = 0; i < employees.Count; i++)
+            {
+                var employee = employees[i];
+                if (employee == null) continue;
+
+                string assigned = selectedEmployeeIds.Contains(employees[i]!.Id) ? "[SELECTED] " : "";
+                Console.WriteLine($"{i + 1}. {assigned}{employee.FirstName} {employee.LastName} ({employee.Role})");
+            }
+
+            ConsoleHelper.ShowExitPrompt("finish selecting employees");
+
+            string selection = Console.ReadLine()!.Trim();
+            if (string.IsNullOrWhiteSpace(selection)) break;
+
+            if (int.TryParse(selection, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= employees.Count)
+            {
+                int selectedId = employees[selectedIndex - 1]!.Id;
+                if (selectedEmployeeIds.Contains(selectedId))
+                    selectedEmployeeIds.Remove(selectedId);
+                else
+                    selectedEmployeeIds.Add(selectedId);
+            }
+            else
+            {
+                ConsoleHelper.WriteLineColored("Invalid selection.\n", ConsoleColor.Red);
+            }
+        }
+
+        return selectedEmployeeIds;
     }
 }

@@ -81,7 +81,7 @@ public class ViewProjectsDialog(IProjectService projectService)
         int index = 1;
         foreach (var project in projects)
         {
-            Console.WriteLine($"[{index}] {project!.Title} (Customer: {project.CustomerName})");
+            Console.WriteLine($"{index}. {project!.Title}");
             index++;
         }
 
@@ -94,7 +94,7 @@ public class ViewProjectsDialog(IProjectService projectService)
         }
 
         var selectedProject = projects.ElementAt(selectedIndex - 1)!;
-        await ViewProjectDetailsAsync(selectedProject, "return to Project Menu");
+        await ViewProjectDetailsAsync(selectedProject, "return to View Projects Menu");
     }
 
 
@@ -109,26 +109,14 @@ public class ViewProjectsDialog(IProjectService projectService)
         Console.WriteLine("              PROJECT DETAILS              ");
         Console.WriteLine("-------------------------------------------\n");
 
-        ConsoleHelper.WriteColored("Title: ".PadRight(15), ConsoleColor.White);
-        Console.WriteLine($"{project.Title}");
-
-        ConsoleHelper.WriteColored("Description: ".PadRight(15), ConsoleColor.White);
-        Console.WriteLine($"{project.Description}");
-
-        ConsoleHelper.WriteColored("Customer: ".PadRight(15), ConsoleColor.White);
-        Console.WriteLine($"{project.CustomerName}");
-
-        ConsoleHelper.WriteColored("Start Date: ".PadRight(15), ConsoleColor.White);
-        Console.WriteLine($"{(project.StartDate.HasValue ? project.StartDate.Value.ToString("yyyy-MM-dd") : "Not specified.")}");
-
-        ConsoleHelper.WriteColored("End Date: ".PadRight(15), ConsoleColor.White);
-        Console.WriteLine($"{(project.EndDate.HasValue ? project.EndDate.Value.ToString("yyyy-MM-dd") : "Not specified.")}");
-
-        ConsoleHelper.WriteColored("Status: ".PadRight(15), ConsoleColor.White);
-        Console.WriteLine($"{StatusHelper.GetFormattedStatus(project.Status)}");
-
-        ConsoleHelper.WriteColored("Created: ".PadRight(15), ConsoleColor.White);
-        Console.WriteLine($"{project.CreatedDate:yyyy-MM-dd}");
+        Console.WriteLine($"ID:".PadRight(18) + $"{project.Id}");
+        Console.WriteLine($"Title:".PadRight(18) + $"{project.Title}");
+        Console.WriteLine($"Description:".PadRight(18) + $"{project.Description}");
+        Console.WriteLine($"Customer:".PadRight(18) + $"{project.CustomerName}");
+        Console.WriteLine($"Start Date:".PadRight(18) + $"{(project.StartDate.HasValue ? project.StartDate.Value.ToString("yyyy-MM-dd") : "Not specified.")}");
+        Console.WriteLine($"End Date:".PadRight(18) + $"{(project.EndDate.HasValue ? project.EndDate.Value.ToString("yyyy-MM-dd") : "Not specified.")}");
+        Console.WriteLine($"Status:".PadRight(18) + $"{StatusHelper.GetFormattedStatus(project.Status)}\n");
+        Console.WriteLine($"Created:".PadRight(18) + $"{project.CreatedDate:yyyy-MM-dd}");
 
         Console.WriteLine("\n-------------------------------------------");
 

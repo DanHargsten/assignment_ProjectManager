@@ -1,5 +1,6 @@
 ﻿using Business.Interfaces;
 using Business.Models;
+using Business.Services;
 using Data.Enums;
 using Presentation.ConsoleApp.Helpers;
 
@@ -10,10 +11,11 @@ namespace Presentation.ConsoleApp.Dialogs;
 /// <summary>
 /// Handles user input for creating a new project and passes it to the ProjectService.
 /// </summary>
-public class CreateProjectDialog(IProjectService projectService, ICustomerService customerService)
+public class CreateProjectDialog(IProjectService projectService, ICustomerService customerService, IEmployeeService employeeService)
 {
     private readonly IProjectService _projectService = projectService;
     private readonly ICustomerService _customerService = customerService;
+    private readonly IEmployeeService _employeeService = employeeService;
 
 
     #region Main Execution
@@ -25,39 +27,37 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
     public async Task ExecuteAsync()
     {
         Console.Clear();
-        Console.WriteLine("-------------------------------------");
-        Console.WriteLine("------   CREATE NEW PROJECT    ------");
-        Console.WriteLine("-------------------------------------\n");
-        ConsoleHelper.WriteOptionalFieldNotice();
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("              CREATE PROJECT               ");
+        Console.WriteLine("-------------------------------------------\n");
+        Console.WriteLine("Fill in the fields below to add a new project.\n");
 
 
-        // Få användarens input för projektdetaljer
+        // Hämta projektdetaljer
         string title = InputHelper.GetUserInput("Enter project title: ");
         string? description = InputHelper.GetUserOptionalInput("(optional) Enter project description: ");
-
-        // Start- och slutdatum från användaren
         DateTime? startDate = GetNullableDateInput("(optional) Enter project start date (YYYY-MM-DD): ");
         DateTime? endDate = GetNullableDateInput("(optional) Enter project end date (YYYY-MM-DD): ");
 
 
-        // Lista befintliga kunder och låt användaren välja en
+        // Välj kund
         var customers = (await _customerService.GetCustomersAsync()).ToList();
         if (customers.Count == 0)
         {
             ConsoleHelper.WriteLineColored("No customers available. Please add a customer first.", ConsoleColor.Yellow);
-            Console.WriteLine("\nPress any key to return...");
+            ConsoleHelper.ShowExitPrompt("return to the Project Menu");
             return;
         }
 
         var selectedCustomer = SelectCustomer(customers!);
         if (selectedCustomer == null) return;
 
-        // Lista tillgängliga projektstatusar och låt användaren välja en
+        // Välj projektstatus
         var selectedStatus = SelectProjectStatus();
         if (selectedStatus == null) return;
 
 
-        // Skapa ett formulär med all information
+        // Skapa projektformulär
         var form = new ProjectRegistrationForm
         {
             Title = title,
@@ -70,22 +70,19 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         };
 
 
-        // Visa bekräftelse innan projektet skapas
+        // Bekräfta skapandet av projektet
         Console.Clear();
-        Console.WriteLine("----------------------------------------");
-        Console.WriteLine("-----   Confirm Project Creation   -----");
-        Console.WriteLine("----------------------------------------\n");
-
-        Console.WriteLine("--- Project details");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("          CONFIRM PROJECT CREATION         ");
+        Console.WriteLine("-------------------------------------------\n");
         Console.WriteLine($"Title: {form.Title}");
         Console.WriteLine($"Description: {form.Description}");
         Console.WriteLine($"Customer: {selectedCustomer.Name}");
         Console.WriteLine($"Start Date: {form.StartDate?.ToString("yyyy-MM-dd") ?? "Not specified"}");
         Console.WriteLine($"End Date: {form.EndDate?.ToString("yyyy-MM-dd") ?? "Not specified"}");
         Console.WriteLine($"Status: {StatusHelper.GetFormattedStatus(form.Status)}");
-        Console.WriteLine($"Created Date: {form.CreatedDate:yyyy-MM-dd}");
 
-        Console.Write("\nDo you want to create this project? Y to accept, or press Enter to cancel: ");
+        Console.Write("\nAre the details correct? Press Y to confirm, or Enter to cancel: ");
         var confirmation = Console.ReadLine()?.Trim().ToLower();
 
         if (confirmation == "y")
@@ -103,32 +100,112 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
             ConsoleHelper.WriteLineColored("Project creation cancelled.", ConsoleColor.Yellow);
         }
 
-        Console.WriteLine("\nPress any key to continue...");
+        ConsoleHelper.ShowExitPrompt("continue");
         Console.ReadKey();
+
+        await AssignEmployeesToProjectAsync(form);
     }
 
     #endregion
 
 
 
-    #region Helper Methods
+
+
+    #region Employee Assignment
 
     /// <summary>
-    /// Prompts user to enter a valid date.
+    /// Prompts user to assign employees to the newly created project.
     /// </summary>
-    private static DateTime GetDateInput(string prompt)
+    private async Task AssignEmployeesToProjectAsync(ProjectRegistrationForm project)
     {
-        while (true)
-        {
-            Console.Write(prompt);
-            if (DateTime.TryParse(Console.ReadLine(), out DateTime date))
-                return date;
+        Console.Clear();
+        Console.Write("\nDo you want to assign employees to this project? (Y/N): ");
+        var input = Console.ReadLine()?.Trim().ToLower();
+        if (input != "y") return;
 
-            ConsoleHelper.WriteLineColored("Invalid date format. Please use YYYY-MM-DD.\n", ConsoleColor.Red);
+        
+        // Hämta alla anställda
+        var employees = (await _employeeService.GetEmployeesAsync()).ToList();
+        if (employees.Count == 0)
+        {
+            ConsoleHelper.WriteLineColored("No employees available to assign.", ConsoleColor.Yellow);
+            ConsoleHelper.ShowExitPrompt("return to Project Menu");
+            Console.ReadKey();
+            return;
+        }
+
+        var selectedEmployeeIds = new List<int>();
+
+        while (true)
+        {    
+            Console.Clear();
+            Console.WriteLine("-------------------------------------------");
+            Console.WriteLine("       SELECT EMPLOYEES FOR PROJECT        ");
+            Console.WriteLine("-------------------------------------------\n");
+
+            // Visa alla anställda i en lista
+            for (int i = 0; i < employees.Count; i++)
+            {
+                string assigned = selectedEmployeeIds.Contains(employees[i]!.Id) ? "[SELECTED] " : "";
+                Console.WriteLine($"{i + 1}. {assigned}{employees[i]!.FirstName} {employees[i]!.LastName} ({employees[i]!.Role})");
+            }
+
+            ConsoleHelper.ShowExitPrompt("finish assigning employees");
+
+            string selection = Console.ReadLine()!.Trim();
+            if (string.IsNullOrWhiteSpace(selection)) break;
+
+            if (int.TryParse(selection, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= employees.Count)
+            {
+                int selectedId = employees[selectedIndex - 1]!.Id;
+                if (selectedEmployeeIds.Contains(selectedId))
+                    selectedEmployeeIds.Remove(selectedId);
+                else
+                    selectedEmployeeIds.Add(selectedId);
+            }
+            else
+            {
+                ConsoleHelper.WriteLineColored("Invalid selection.\n", ConsoleColor.Red);
+            }
+        }
+
+        if (selectedEmployeeIds.Count != 0)
+        {
+            await _projectService.AssignEmployeesToProjectAsync(project.CustomerId, selectedEmployeeIds);
+            ConsoleHelper.WriteLineColored("\nEmployees assigned successfully!", ConsoleColor.Green);
         }
     }
 
 
+
+
+    private static List<int> ParseEmployeeSelection(string input, List<Employee> employees)
+    {
+        var selectedIds = new List<int>();
+
+        var entries = input.Split(",");
+        foreach (var entry in entries)
+        {
+            if (int.TryParse(entry.Trim(), out int index) && index >= 1 && index <= employees.Count)
+            {
+                selectedIds.Add(employees[index - 1].Id);
+            }
+            else
+            {
+                ConsoleHelper.WriteLineColored($"Invalid selection: {entry}. Skipping.", ConsoleColor.Red);
+            }
+        }
+
+        return selectedIds;
+    }
+
+
+    #endregion
+
+
+
+    #region Helper Methods
 
     /// <summary>
     /// Prompts user for an optional date. Allows skipping by pressing ENTER.
@@ -212,6 +289,10 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
             ConsoleHelper.WriteLineColored("Invalid selection. Please enter a valid number.\n", ConsoleColor.Red);
         }
     }
+
+
+
+
 
     #endregion
 }
