@@ -5,12 +5,18 @@ using System.Linq.Expressions;
 
 namespace Data.Repositories;
 
+/// <summary>
+/// Abstract class that implements basic CRUD operations.
+/// </summary>
 public abstract class BaseRepository<TEntity>(DataContext context) : IBaseRepository<TEntity> where TEntity : class
 {
     protected readonly DataContext _context = context;
     protected readonly DbSet<TEntity> _dbSet = context.Set<TEntity>();
 
-    // CREATE //
+
+    // ===========================================
+    //                  CREATE
+    // ===========================================
     public virtual async Task<TEntity> AddAsync(TEntity entity)
     {    
         _dbSet.Add(entity);
@@ -19,7 +25,9 @@ public abstract class BaseRepository<TEntity>(DataContext context) : IBaseReposi
     }
 
 
-    // READ //
+    // ===========================================
+    //                   READ
+    // ===========================================
     public async Task<IEnumerable<TEntity>> GetAllAsync()
     {
         return await _dbSet.ToListAsync();
@@ -30,14 +38,15 @@ public abstract class BaseRepository<TEntity>(DataContext context) : IBaseReposi
         return await _dbSet.Where(expression).ToListAsync();
     }
 
-
     public virtual async Task<TEntity?> GetOneAsync(Expression<Func<TEntity, bool>> expression)
     {
         return await _dbSet.FirstOrDefaultAsync(expression);
     }
 
 
-    // UPDATE //
+    // ===========================================
+    //                 UPDATE
+    // ===========================================
     public virtual async Task<TEntity?> UpdateAsync(TEntity entity)
     {
         _dbSet.Update(entity);
@@ -46,7 +55,9 @@ public abstract class BaseRepository<TEntity>(DataContext context) : IBaseReposi
     }
 
 
-    // DELETE //
+    // ===========================================
+    //                 DELETE
+    // ===========================================
     public virtual async Task<bool> DeleteAsync(TEntity entity)
     {
         _dbSet.Remove(entity);

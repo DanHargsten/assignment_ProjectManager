@@ -2,6 +2,9 @@
 
 namespace Data.Interfaces;
 
+/// <summary>
+/// Repository interface for the relationship between projects and employees.
+/// </summary>
 public interface IProjectEmployeeRepository : IBaseRepository<ProjectEmployee>
 {    
     Task<bool> RemoveEmployeeFromProjectAsync(int projectId, int employeeId);

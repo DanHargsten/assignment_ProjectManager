@@ -5,11 +5,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data.Repositories;
 
+/// <summary>
+/// Implementation of a repository for the relationship between projects and employees.
+/// </summary>
 public class ProjectEmployeeRepository(DataContext context) : BaseRepository<ProjectEmployee>(context), IProjectEmployeeRepository
 {
-    /// <summary>
-    /// Removes an employee from a project.
-    /// </summary>
+    // ===========================================
+    //        REMOVE EMPLOYEE FROM PROJECT
+    // ===========================================
     public async Task<bool> RemoveEmployeeFromProjectAsync(int projectId, int employeeId)
     {
         var projectEmployee = await _context.ProjectEmployees
@@ -24,11 +27,9 @@ public class ProjectEmployeeRepository(DataContext context) : BaseRepository<Pro
     }
 
 
-
-
-    /// <summary>
-    /// Removes all employees assigned to a specific project.
-    /// </summary>
+    // ===========================================
+    //        REMOVE ALL EMPLOYEES FROM PROJECT
+    // ===========================================
     public async Task<bool> RemoveAllEmployeesFromProjectAsync(int projectId)
     {
         var entries = await _context.ProjectEmployees
@@ -44,11 +45,9 @@ public class ProjectEmployeeRepository(DataContext context) : BaseRepository<Pro
     }
 
 
-
-
-    /// <summary>
-    /// Retrieves all employees assigned to a specific project.
-    /// </summary>
+    // ===========================================
+    //      GET ALL EMPLOYEES BY PROJECT ID
+    // ===========================================
     public async Task<IEnumerable<ProjectEmployee>> GetEmployeesByProjectIdAsync(int projectId)
     {
         return await _context.ProjectEmployees

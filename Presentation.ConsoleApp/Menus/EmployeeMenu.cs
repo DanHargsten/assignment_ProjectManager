@@ -6,10 +6,11 @@ using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Menus;
 
-public class EmployeeMenu(IEmployeeService employeeService, CreateEmployeeDialog createEmployeeDialog)
+public class EmployeeMenu(IEmployeeService employeeService, CreateEmployeeDialog createEmployeeDialog, ViewEmployeesDialog viewEmployeesDialog)
 {
     private readonly IEmployeeService _employeeService = employeeService;
     private readonly CreateEmployeeDialog _createEmployeeDialog = createEmployeeDialog;
+    private readonly ViewEmployeesDialog _viewEmployeesDialog = viewEmployeesDialog;
 
     public async Task ExecuteAsync()
     {
@@ -38,11 +39,11 @@ public class EmployeeMenu(IEmployeeService employeeService, CreateEmployeeDialog
                     await _createEmployeeDialog.ExecuteAsync();
                     break;
                 case "2":
-                    await ViewAllEmployeesAsync();
+                    await _viewEmployeesDialog.ExecuteAsync();
                     break;
                 case "3":
-                    await ViewEmployeeDetailsAsync();
-                    break;
+                    //await ViewEmployeeDetailsAsync();
+                    //break;
                 case "0":
                     return;
                 default:
@@ -51,67 +52,5 @@ public class EmployeeMenu(IEmployeeService employeeService, CreateEmployeeDialog
                     break;
             }
         }
-    }
-
-  
-
-    private async Task ViewAllEmployeesAsync()
-    {
-        Console.Clear();
-        Console.WriteLine("---- EMPLOYEE LIST ----\n");
-
-        var employees = (await _employeeService.GetEmployeesAsync()).ToList();
-        if (!employees.Any())
-        {
-            Console.WriteLine("No employees found.");
-            Console.ReadKey();
-            return;
-        }
-
-        for (int i = 0; i < employees.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}. {employees[i]?.FirstName} {employees[i]?.LastName} - {employees[i]?.Role.ToString()}");
-        }
-
-        Console.WriteLine("\nPress any key to return...");
-        Console.ReadKey();
-    }
-
-    private async Task ViewEmployeeDetailsAsync()
-    {
-        Console.Clear();
-        Console.WriteLine("---- VIEW EMPLOYEE DETAILS ----\n");
-
-        Console.Write("Enter Employee ID: ");
-        bool isValidId = int.TryParse(Console.ReadLine(), out int id);
-        if (!isValidId)
-        {
-            Console.WriteLine("Invalid ID format.");
-            Console.ReadKey();
-            return;
-        }
-
-        var employee = await _employeeService.GetEmployeeByIdAsync(id);
-        if (employee == null)
-        {
-            Console.WriteLine("Employee not found.");
-            Console.ReadKey();
-            return;
-        }
-
-        Console.WriteLine("\n-------------------------------------------");
-        Console.WriteLine($"Name: {employee.FirstName} {employee.LastName}");
-        Console.WriteLine($"Email: {employee.Email}");
-        Console.WriteLine($"Phone: {employee.Phone}");
-        Console.WriteLine($"Role: {employee.Role}");
-        Console.WriteLine("-------------------------------------------\n");
-
-        Console.WriteLine("Press any key to return...");
-        Console.ReadKey();
-    }
-
-
-
-
-    
+    } 
 }
