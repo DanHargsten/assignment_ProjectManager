@@ -1,9 +1,10 @@
 ﻿using Business.Interfaces;
 using Business.Models;
+using Presentation.ConsoleApp.Dialogs.ProjectDialogs;
 using Presentation.ConsoleApp.Helpers;
 
 
-namespace Presentation.ConsoleApp.Dialogs;
+namespace Presentation.ConsoleApp.Dialogs.CustomerDialogs;
 
 /// <summary>
 /// Handles viewing customers, including listing all customers and selecting one.
@@ -92,7 +93,7 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
         Console.WriteLine($"Email:".PadRight(15) + $"{(!string.IsNullOrWhiteSpace(customer.Email) ? customer.Email : "No email provided")}");
         Console.WriteLine($"Phone:".PadRight(15) + $"{(!string.IsNullOrWhiteSpace(customer.PhoneNumber) ? customer.PhoneNumber : "No phone number provided")}");
 
-        
+
         // Hämta och visa kundens aktiva projekt
         var projects = (await _projectService.GetProjectsByCustomerIdAsync(customer.Id)).ToList();
 
@@ -128,7 +129,7 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
                 // Hantera projektval
                 if (int.TryParse(input, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= projects.Count)
                 {
-                    var selectedProject = projects[selectedIndex -1];
+                    var selectedProject = projects[selectedIndex - 1];
                     await ViewProjectsDialog.ViewProjectDetailsAsync(selectedProject, "return to Customer Menu");
                     return;
                 }
@@ -137,7 +138,7 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
                     ConsoleHelper.WriteColored("Invalid selection. Please enter a valid project number.\n", ConsoleColor.Red);
                 }
             }
-        }     
+        }
         else
         {
             Console.WriteLine("\nNo active projects.");
@@ -145,6 +146,6 @@ public class ViewCustomersDialog(ICustomerService customerService, IProjectServi
             ConsoleHelper.ShowExitPrompt("return to Customer Menu");
             Console.ReadKey();
         }
-    }    
+    }
     #endregion
 }

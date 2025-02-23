@@ -3,7 +3,7 @@ using Business.Models;
 using Data.Enums;
 using Presentation.ConsoleApp.Helpers;
 
-namespace Presentation.ConsoleApp.Dialogs;
+namespace Presentation.ConsoleApp.Dialogs.ProjectDialogs;
 
 
 /// <summary>
@@ -136,7 +136,7 @@ public class ViewProjectsDialog(IProjectService projectService)
         Console.Clear();
         Console.WriteLine("-------------------------------------------");
         Console.WriteLine("              SEARCH PROJECTS              ");
-        Console.WriteLine("-------------------------------------------\n");     
+        Console.WriteLine("-------------------------------------------\n");
 
         Console.Write("Enter Customer ID, Name, or Email: ");
         string input = Console.ReadLine()!.Trim();
@@ -158,7 +158,7 @@ public class ViewProjectsDialog(IProjectService projectService)
         {
             projects = await _projectService.GetProjectsByCustomerNameOrEmailAsync(input);
         }
-        
+
         if (!projects.Any())
         {
             Console.WriteLine("\nNo projects found.");

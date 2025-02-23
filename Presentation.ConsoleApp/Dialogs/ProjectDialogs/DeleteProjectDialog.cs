@@ -1,6 +1,6 @@
 ﻿using Business.Interfaces;
 
-namespace Presentation.ConsoleApp.Dialogs;
+namespace Presentation.ConsoleApp.Dialogs.ProjectDialogs;
 
 /// <summary>
 /// Handles deleting a project.
@@ -50,7 +50,7 @@ public class DeleteProjectDialog(IProjectService projectService)
             {
                 var selectedProject = projects[selectedIndex - 1]!;
 
-                
+
                 // Frågar efter bekräftelse innan radering
                 Console.ForegroundColor = ConsoleColor.Yellow;
                 Console.WriteLine($"\nAre you sure you want to delete '{selectedProject.Title}'?");
@@ -60,9 +60,9 @@ public class DeleteProjectDialog(IProjectService projectService)
                 string confirmation = Console.ReadLine()!.Trim().ToLower();
                 if (confirmation == "yes")
                 {
-                   // Anropa ProjectService för att ta bort projektet
+                    // Anropa ProjectService för att ta bort projektet
                     bool success = await _projectService.RemoveProjectAsync(selectedProject.Id);
-                   
+
                     Console.Clear();
                     if (success)
                     {

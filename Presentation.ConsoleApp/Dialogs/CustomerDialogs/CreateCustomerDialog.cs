@@ -2,7 +2,7 @@
 using Business.Models;
 using Presentation.ConsoleApp.Helpers;
 
-namespace Presentation.ConsoleApp.Dialogs;
+namespace Presentation.ConsoleApp.Dialogs.CustomerDialogs;
 
 /// <summary>
 /// Handles user input for creating a new customer and passes it to the CustomerService.
@@ -55,7 +55,7 @@ public class CreateCustomerDialog(ICustomerService customerService)
 
             // Skicka kunden till service-lagret för att skapas
             bool success = await _customerService.CreateCustomerAsync(form);
-            
+
             if (success)
                 ConsoleHelper.WriteLineColored("\nCustomer created successfully!", ConsoleColor.Green);
             else

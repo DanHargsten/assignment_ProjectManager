@@ -50,7 +50,7 @@ public class MainMenu(CustomerMenu customerMenu, ProjectMenu projectMenu, Employ
                     break;
 
                 default:
-                    ConsoleHelper.WriteLineColored("\nInvalid input, press any key to try again...", ConsoleColor.Red);
+                    ConsoleHelper.WriteLineColored("\nInvalid input, press any key to try again.", ConsoleColor.Red);
                     Console.ReadKey();
                     break;
             }

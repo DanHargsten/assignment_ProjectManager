@@ -1,6 +1,6 @@
 ﻿using Business.Interfaces;
 
-namespace Presentation.ConsoleApp.Dialogs;
+namespace Presentation.ConsoleApp.Dialogs.EmployeeDialogs;
 
 public class ViewEmployeesDialog(IEmployeeService employeeService)
 {

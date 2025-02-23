@@ -2,7 +2,7 @@
 using Business.Models;
 using Presentation.ConsoleApp.Helpers;
 
-namespace Presentation.ConsoleApp.Dialogs;
+namespace Presentation.ConsoleApp.Dialogs.CustomerDialogs;
 
 
 /// <summary>
@@ -45,14 +45,20 @@ public class UpdateCustomerDialog(ICustomerService customerService)
             ConsoleHelper.ShowExitPrompt("return to Customer Menu");
 
             string input = Console.ReadLine()!;
-
-            // Exit om input är tomt eller "0"
-            if (string.IsNullOrWhiteSpace(input) || input == "0") return;
+           
+            if (string.IsNullOrWhiteSpace(input)) return;
 
             // Hantera kundval om ett giltigt nummer anges
             if (int.TryParse(input, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= customers.Count)
             {
                 var selectedCustomer = customers[selectedIndex - 1]!;
+
+                if (selectedCustomer == null)
+                {
+                    ConsoleHelper.WriteLineColored("Error: Selected customer does not exist.", ConsoleColor.Red);
+                    continue;
+                }
+
                 await PromptForCustomerUpdateAsync(selectedCustomer);
                 break;
             }
@@ -111,10 +117,10 @@ public class UpdateCustomerDialog(ICustomerService customerService)
         bool success = await _customerService.UpdateCustomerAsync(selectedCustomer.Id, newName, newEmail, newPhone);
         Console.Clear();
 
-        if (success)        
-            ConsoleHelper.WriteLineColored("Customer updated successfully!", ConsoleColor.Green);        
-        else        
-            ConsoleHelper.WriteLineColored("Failed to update customer.", ConsoleColor.Red);        
+        if (success)
+            ConsoleHelper.WriteLineColored("Customer updated successfully!", ConsoleColor.Green);
+        else
+            ConsoleHelper.WriteLineColored("Failed to update customer.", ConsoleColor.Red);
 
         Console.WriteLine("\nPress any key to continue...");
         Console.ReadKey();

@@ -5,7 +5,7 @@ using Data.Enums;
 using Presentation.ConsoleApp.Helpers;
 using System.Net.Http.Headers;
 
-namespace Presentation.ConsoleApp.Dialogs;
+namespace Presentation.ConsoleApp.Dialogs.ProjectDialogs;
 
 
 /// <summary>
@@ -115,7 +115,7 @@ public class UpdateProjectDialog(IProjectService projectService, IEmployeeServic
         if (success)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Project updated successfully!");           
+            Console.WriteLine("Project updated successfully!");
         }
         else
         {

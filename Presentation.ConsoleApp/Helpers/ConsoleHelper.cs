@@ -35,7 +35,7 @@ public class ConsoleHelper
     public static void ShowExitPrompt(string message)
     {
         Console.Write("Press ");
-        WriteColored("ENTER ", ConsoleColor.Yellow);        
+        WriteColored("Enter ", ConsoleColor.Yellow);        
         Console.Write($"(leave blank) to {message}.\n");
     }
 }

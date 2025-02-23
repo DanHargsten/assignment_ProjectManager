@@ -1,4 +1,4 @@
-﻿using Presentation.ConsoleApp.Dialogs;
+﻿using Presentation.ConsoleApp.Dialogs.CustomerDialogs;
 using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Menus;

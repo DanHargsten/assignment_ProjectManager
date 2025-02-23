@@ -3,7 +3,7 @@ using Business.Models;
 using Data.Enums;
 using Presentation.ConsoleApp.Helpers;
 
-namespace Presentation.ConsoleApp.Dialogs;
+namespace Presentation.ConsoleApp.Dialogs.CustomerDialogs;
 
 /// <summary>
 /// Handles deleting a customer.
@@ -124,7 +124,7 @@ public class DeleteCustomerDialog(ICustomerService customerService, IProjectServ
             Console.Clear();
             ConsoleHelper.WriteLineColored("This customer has active or pending projects:", ConsoleColor.Yellow);
 
-            
+
             // Lista de projekt som inte är slutförda
             for (int i = 0; i < activeProjects.Count; i++)
             {

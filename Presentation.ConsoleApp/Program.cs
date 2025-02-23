@@ -5,7 +5,9 @@ using Data.Interfaces;
 using Data.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Presentation.ConsoleApp.Dialogs;
+using Presentation.ConsoleApp.Dialogs.CustomerDialogs;
+using Presentation.ConsoleApp.Dialogs.EmployeeDialogs;
+using Presentation.ConsoleApp.Dialogs.ProjectDialogs;
 using Presentation.ConsoleApp.Menus;
 
 var services = new ServiceCollection()
@@ -22,7 +24,6 @@ var services = new ServiceCollection()
     .AddScoped<CustomerMenu>()
     .AddScoped<ProjectMenu>()
     .AddScoped<EmployeeMenu>()
-    .AddScoped<CustomerDialog>()
     .AddScoped<CreateCustomerDialog>()
     .AddScoped<CreateProjectDialog>()
     .AddScoped<CreateEmployeeDialog>()
@@ -31,8 +32,10 @@ var services = new ServiceCollection()
     .AddScoped<ViewEmployeesDialog>()
     .AddScoped<UpdateCustomerDialog>()
     .AddScoped<UpdateProjectDialog>()
+    .AddScoped<UpdateEmployeeDialog>()
     .AddScoped<DeleteCustomerDialog>()
     .AddScoped<DeleteProjectDialog>()
+    .AddScoped<DeleteEmployeeDialog>()
     .BuildServiceProvider();
 
 var menu = services.GetRequiredService<MainMenu>();
