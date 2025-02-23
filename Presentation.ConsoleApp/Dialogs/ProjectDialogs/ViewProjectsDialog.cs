@@ -1,6 +1,7 @@
 ﻿using Business.Interfaces;
 using Business.Models;
-using Data.Enums;
+using Data.Interfaces;
+using Data.Repositories;
 using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Dialogs.ProjectDialogs;
@@ -9,11 +10,17 @@ namespace Presentation.ConsoleApp.Dialogs.ProjectDialogs;
 /// <summary>
 /// Handles viewing projects, including listing all projects, selecting one, and searching.
 /// </summary>
-public class ViewProjectsDialog(IProjectService projectService)
+public class ViewProjectsDialog(IProjectService projectService, IProjectEmployeeRepository projectEmployeeRepository)
 {
     private readonly IProjectService _projectService = projectService;
+    private readonly IProjectEmployeeRepository _projectEmployeeRepository = projectEmployeeRepository;
 
-    #region Main Execution
+
+
+    // ==================================================
+    //                   MAIN EXECUTION
+    // ==================================================
+
     /// <summary>
     /// Shows the main project viewing menu.
     /// </summary>
@@ -23,12 +30,12 @@ public class ViewProjectsDialog(IProjectService projectService)
         while (true)
         {
             Console.Clear();
-            Console.WriteLine("-------------------------------------");
-            Console.WriteLine("--------    VIEW PROJECTS    --------");
-            Console.WriteLine("-------------------------------------\n");
+            Console.WriteLine("-------------------------------------------");
+            Console.WriteLine("               VIEW PROJECTS               ");
+            Console.WriteLine("-------------------------------------------\n");
             Console.WriteLine("1. View All Projects");
-            Console.WriteLine("2. Search project by customer");
-            Console.WriteLine("0. Back to main menu");
+            Console.WriteLine("2. Search project by customer\n");
+            ConsoleHelper.ShowExitPrompt("return to Project Menu");
             Console.Write("\nPick an option: ");
 
             string option = Console.ReadLine()!;
@@ -42,9 +49,6 @@ public class ViewProjectsDialog(IProjectService projectService)
                     await SearchProjectsByCustomerAsync();
                     break;
 
-                case "0":
-                    return;
-
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
                     Console.ReadKey();
@@ -52,19 +56,20 @@ public class ViewProjectsDialog(IProjectService projectService)
             }
         }
     }
-    #endregion
 
 
 
 
+    // ==================================================
+    //               VIEW ALL PROJECTS
+    // ==================================================
 
-
-    #region Helper Methods
     /// <summary>
     /// Lists all projects with an index, allowing the user to select one for details.
     /// </summary>
     private async Task ViewAllProjectsAsync()
     {
+        // Hämtar alla projekt från databasen
         var projects = await _projectService.GetProjectsAsync();
         if (!projects.Any())
         {
@@ -77,6 +82,8 @@ public class ViewProjectsDialog(IProjectService projectService)
         Console.WriteLine("-------------------------------------------");
         Console.WriteLine("             VIEW ALL PROJECTS             ");
         Console.WriteLine("-------------------------------------------\n");
+
+        // Skriver ut alla projekt med indexnummer
         int index = 1;
         foreach (var project in projects)
         {
@@ -85,6 +92,8 @@ public class ViewProjectsDialog(IProjectService projectService)
         }
 
         Console.WriteLine("\nEnter project number for details");
+
+        // Validera användarens inmatning och hämta projekt
         if (!int.TryParse(Console.ReadLine(), out int selectedIndex) || selectedIndex < 1 || selectedIndex > projects.Count())
         {
             Console.WriteLine("Invalid selection.");
@@ -92,11 +101,17 @@ public class ViewProjectsDialog(IProjectService projectService)
             return;
         }
 
+        // Hämta det valda projektet
         var selectedProject = projects.ElementAt(selectedIndex - 1)!;
         await ViewProjectDetailsAsync(selectedProject, "return to View Projects Menu");
     }
 
 
+
+
+    // ==================================================
+    //             VIEW PROJECT DETAILS
+    // ==================================================
 
     /// <summary>
     /// Displays detailed information about a selected project.
@@ -128,6 +143,10 @@ public class ViewProjectsDialog(IProjectService projectService)
 
 
 
+    // ==================================================
+    //          SEARCH PROJECTS BY CUSTOMER
+    // ==================================================
+
     /// <summary>
     /// Allows the user to search for projects by Customer ID, Name, or Email.
     /// </summary>
@@ -141,6 +160,7 @@ public class ViewProjectsDialog(IProjectService projectService)
         Console.Write("Enter Customer ID, Name, or Email: ");
         string input = Console.ReadLine()!.Trim();
 
+        // Validerar om användaren har angett en giltig inmatning
         if (string.IsNullOrWhiteSpace(input))
         {
             Console.WriteLine("Invalid input. Please enter a valid Customer ID, Name, or Email.");
@@ -150,6 +170,7 @@ public class ViewProjectsDialog(IProjectService projectService)
 
         IEnumerable<Project> projects;
 
+        // Kollar om användaren har angett ett kund-ID (siffra)
         if (int.TryParse(input, out int customerID))
         {
             projects = await _projectService.GetProjectsByCustomerIdAsync(customerID);
@@ -159,6 +180,7 @@ public class ViewProjectsDialog(IProjectService projectService)
             projects = await _projectService.GetProjectsByCustomerNameOrEmailAsync(input);
         }
 
+        // Skriver ut resultatet av sökningen
         if (!projects.Any())
         {
             Console.WriteLine("\nNo projects found.");
@@ -175,5 +197,4 @@ public class ViewProjectsDialog(IProjectService projectService)
         Console.WriteLine("\nPress any key to return...");
         Console.ReadKey();
     }
-    #endregion
 }

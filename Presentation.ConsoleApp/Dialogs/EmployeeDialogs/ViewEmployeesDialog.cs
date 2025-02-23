@@ -1,11 +1,26 @@
 ﻿using Business.Interfaces;
+using Presentation.ConsoleApp.Helpers;
 
 namespace Presentation.ConsoleApp.Dialogs.EmployeeDialogs;
 
+
+
+/// <summary>
+/// Handles viewing employees, including listing all employees and viewing details for a specific employee.
+/// </summary>
 public class ViewEmployeesDialog(IEmployeeService employeeService)
 {
     private readonly IEmployeeService _employeeService = employeeService;
 
+
+
+    // ==================================================
+    //                   MAIN EXECUTION
+    // ==================================================
+
+    /// <summary>
+    /// Displays the employee viewing menu, allowing the user to choose an action.
+    /// </summary>
     public async Task ExecuteAsync()
     {
         while (true)
@@ -15,8 +30,7 @@ public class ViewEmployeesDialog(IEmployeeService employeeService)
             Console.WriteLine("              VIEW EMPLOYEES               ");
             Console.WriteLine("-------------------------------------------\n");
             Console.WriteLine("1. View All Employees");
-            Console.WriteLine("2. View Employee Details");
-            Console.WriteLine("0. Back to main menu");
+            Console.WriteLine("2. View Employee Details by ID");
             Console.Write("\nPick an option: ");
 
             string option = Console.ReadLine()!;
@@ -30,8 +44,6 @@ public class ViewEmployeesDialog(IEmployeeService employeeService)
                     await ViewEmployeeDetailsAsync();
                     break;
 
-                case "0":
-                    return;
 
                 default:
                     Console.WriteLine("Invalid option. Please try again.");
@@ -41,52 +53,78 @@ public class ViewEmployeesDialog(IEmployeeService employeeService)
         }
     }
 
+
+
+
+    // ==================================================
+    //                VIEW ALL EMPLOYEES
+    // ==================================================
+
+    /// <summary>
+    /// Displays a list of all employees.
+    /// </summary>
     private async Task ViewAllEmployeesAsync()
     {
         Console.Clear();
-        Console.WriteLine("---- EMPLOYEE LIST ----\n");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("              EMPLOYEE LIST                ");
+        Console.WriteLine("-------------------------------------------\n");
 
         var employees = (await _employeeService.GetEmployeesAsync()).ToList();
-        if (!employees.Any())
+        if (employees.Count == 0)
         {
-            Console.WriteLine("No employees found.");
+            ConsoleHelper.WriteLineColored("No employees found.", ConsoleColor.Yellow);
+            ConsoleHelper.ShowExitPrompt("return to Employee Menu");
             Console.ReadKey();
             return;
         }
 
+        // Skriver ut alla anställda med indexnummer
         for (int i = 0; i < employees.Count; i++)
         {
-            Console.WriteLine($"{i + 1}. {employees[i]?.FirstName} {employees[i]?.LastName} - {employees[i]?.Role.ToString()}");
+            Console.WriteLine($"{i + 1}. {employees[i]?.FirstName} {employees[i]?.LastName}".PadRight(30) + $"{employees[i]?.Role.ToString()}");
         }
 
-        Console.WriteLine("\nPress any key to return...");
+        ConsoleHelper.ShowExitPrompt("return to Employee Menu");
         Console.ReadKey();
     }
 
 
 
+
+    // ==================================================
+    //              VIEW EMPLOYEE DETAILS
+    // ==================================================
+
+    /// <summary>
+    /// Displays details for a specific employee.
+    /// </summary>
     private async Task ViewEmployeeDetailsAsync()
     {
         Console.Clear();
-        Console.WriteLine("---- VIEW EMPLOYEE DETAILS ----\n");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("           EMPLOYEE DETAILS                ");
+        Console.WriteLine("-------------------------------------------\n");
 
         Console.Write("Enter Employee ID: ");
-        bool isValidId = int.TryParse(Console.ReadLine(), out int id);
-        if (!isValidId)
+        string input = Console.ReadLine()!.Trim();
+
+        // Validerar inmatning av ID
+        if (!int.TryParse(input, out int employeeId))
         {
-            Console.WriteLine("Invalid ID format.");
-            Console.ReadKey();
+            ConsoleHelper.WriteLineColored("Invalid ID format.", ConsoleColor.Red);
             return;
         }
 
-        var employee = await _employeeService.GetEmployeeByIdAsync(id);
+        // Hämtar anställd från tjänsten
+        var employee = await _employeeService.GetEmployeeByIdAsync(employeeId);
         if (employee == null)
         {
-            Console.WriteLine("Employee not found.");
-            Console.ReadKey();
+            ConsoleHelper.WriteLineColored("Employee not found.", ConsoleColor.Red);
             return;
         }
 
+        // Skriver ut detaljerad information om anställd
         Console.WriteLine("\n-------------------------------------------");
         Console.WriteLine($"Name: {employee.FirstName} {employee.LastName}");
         Console.WriteLine($"Email: {employee.Email}");
@@ -94,7 +132,7 @@ public class ViewEmployeesDialog(IEmployeeService employeeService)
         Console.WriteLine($"Role: {employee.Role}");
         Console.WriteLine("-------------------------------------------\n");
 
-        Console.WriteLine("Press any key to return...");
-        Console.ReadKey();
+        ConsoleHelper.ShowExitPrompt("return to the Employee Menu");
+
     }
 }

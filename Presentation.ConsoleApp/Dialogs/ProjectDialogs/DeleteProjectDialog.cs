@@ -11,7 +11,6 @@ public class DeleteProjectDialog(IProjectService projectService)
     private readonly IProjectService _projectService = projectService;
 
 
-    #region Main Execution
     /// <summary>
     /// Starts the delete process by listing all available projects and prompting the user to select one.
     /// </summary>
@@ -93,5 +92,4 @@ public class DeleteProjectDialog(IProjectService projectService)
             Console.ResetColor();
         }
     }
-    #endregion
 }

@@ -13,5 +13,6 @@ namespace Business.Interfaces
         Task<IEnumerable<Project>> GetProjectsByCustomerIdAsync(int customerId);
         Task<IEnumerable<Project>> GetProjectsByCustomerNameOrEmailAsync(string searchTerm);
         Task<bool> AssignEmployeesToProjectAsync(int projectId, List<int> employeeIds);
+        Task<IEnumerable<Project>> GetProjectsByEmployeeIdAsync(int employeeId);
     }
 }

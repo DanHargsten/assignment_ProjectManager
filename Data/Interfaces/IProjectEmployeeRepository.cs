@@ -10,4 +10,7 @@ public interface IProjectEmployeeRepository : IBaseRepository<ProjectEmployee>
     Task<bool> RemoveEmployeeFromProjectAsync(int projectId, int employeeId);
     Task<bool> RemoveAllEmployeesFromProjectAsync(int projectId);
     Task<IEnumerable<ProjectEmployee>> GetEmployeesByProjectIdAsync(int projectId);
+    //Task<IEnumerable<ProjectEmployee>> GetProjectsByEmployeeIdAsync(int employeeId);
+    Task<IEnumerable<ProjectEntity>> GetProjectsByEmployeeIdAsync(int employeeId);
+
 }

@@ -1,9 +1,8 @@
 ﻿using Business.Interfaces;
 using Business.Models;
-using Business.Services;
 using Data.Enums;
 using Presentation.ConsoleApp.Helpers;
-using System.Net.Http.Headers;
+
 
 namespace Presentation.ConsoleApp.Dialogs.ProjectDialogs;
 
@@ -18,29 +17,36 @@ public class UpdateProjectDialog(IProjectService projectService, IEmployeeServic
     private readonly IEmployeeService _employeeService = employeeService;
 
 
+
+
+
+    // ==================================================
+    //                   MAIN EXECUTION
+    // ==================================================
+
     /// <summary>
     /// Starts the update process by listing all available projects and prompting the user to select one.
     /// </summary>
     public async Task ExecuteAsync()
     {
         Console.Clear();
-        Console.WriteLine("--------------------------------------");
-        Console.WriteLine("--------    UPDATE PROJECT    --------");
-        Console.WriteLine("--------------------------------------\n");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("              UPDATE PROJECT               ");
+        Console.WriteLine("-------------------------------------------\n");      
 
         // Hämtar alla projekt från databasen
         var projects = (await _projectService.GetProjectsAsync()).ToList();
         if (projects.Count == 0)
         {
-            Console.WriteLine("No projects found. Press any key to return...");
+            ConsoleHelper.WriteLineColored("No projects found.", ConsoleColor.Yellow);
+            ConsoleHelper.ShowExitPrompt("return to the Project Menu");
             Console.ReadKey();
             return;
         }
 
         while (true)
         {
-            // Skriver ut alla tillgängliga projekt i en numrerad lista
-            Console.WriteLine("-------   Available projects   -------");
+            // Skriver ut alla tillgängliga projekt i en numrerad lista            
             int index = 1;
             foreach (var project in projects)
             {
@@ -49,25 +55,32 @@ public class UpdateProjectDialog(IProjectService projectService, IEmployeeServic
             }
 
             Console.Write("\nSelect a project by entering its number: ");
+            ConsoleHelper.ShowExitPrompt("return to the Project Menu");
+
             string input = Console.ReadLine()!;
 
+            // Om användaren lämnar fältet tomt, gå tillbaka
             if (string.IsNullOrWhiteSpace(input)) return;
 
-            // Säkerställer att användaren valt ett giltigt projektnummer
+            // Validerar att användaren har angett ett giltigt projektnummer
             if (int.TryParse(input, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= projects.Count)
             {
                 var selectedProject = projects[selectedIndex - 1];
+
                 await PromptForProjectUpdateAsync(selectedProject!);
                 break;
             }
 
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Invalid input. Please Enter a valid number.\n");
-            Console.ResetColor();
+            ConsoleHelper.WriteLineColored("\nInvalid selection. Please enter a valid number.", ConsoleColor.Red);
         }
     }
 
 
+
+
+    // ==================================================
+    //              PROJECT UPDATE PROMPT
+    // ==================================================
 
     /// <summary>
     /// Prompts the user for new project details and updates the project.
@@ -76,13 +89,13 @@ public class UpdateProjectDialog(IProjectService projectService, IEmployeeServic
     private async Task PromptForProjectUpdateAsync(Project selectedProject)
     {
         Console.Clear();
-        Console.WriteLine("--------------------------------------");
-        Console.WriteLine("--------    UPDATE PROJECT    --------");
-        Console.WriteLine("--------------------------------------\n");
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("              UPDATE PROJECT               ");
+        Console.WriteLine("-------------------------------------------\n");
 
         // Om beskrivningen är för lång, trunkera den så att den inte tar för mycket plats i terminalen
-        string truncatedDescription = selectedProject.Description?.Length > 50
-            ? selectedProject.Description[..50] + "..."
+        string truncatedDescription = selectedProject.Description?.Length > 70
+            ? selectedProject.Description[..70] + "..."
             : selectedProject.Description ?? "No description";
 
         // Visar nuvarande information om projektet
@@ -100,7 +113,6 @@ public class UpdateProjectDialog(IProjectService projectService, IEmployeeServic
         string newDescription = GetUserInput($"New Description: ", selectedProject.Description ?? "");
         string newStartDateInput = GetValidDateInput($"New Start Date (yyyy-MM-dd): ", selectedProject.StartDate?.ToString("yyyy-MM-dd") ?? "");
         DateTime? newStartDate = string.IsNullOrWhiteSpace(newStartDateInput) ? selectedProject.StartDate : DateTime.Parse(newStartDateInput);
-
         string newEndDateInput = GetValidDateInput($"New End Date (yyyy-MM-dd):", selectedProject.EndDate?.ToString("yyyy-MM-dd") ?? "");
         DateTime? newEndDate = string.IsNullOrWhiteSpace(newEndDateInput) ? selectedProject.EndDate : DateTime.Parse(newEndDateInput);
         ProjectStatus newStatus = GetValidStatusInput($"New Status: ", selectedProject.Status);
@@ -108,125 +120,65 @@ public class UpdateProjectDialog(IProjectService projectService, IEmployeeServic
         // Hantera anställda
         List<int>? newEmployeeIds = await SelectEmployeesForProjectAsync(selectedProject);
 
-        // Uppdaterar projektet via ProjectService
-        bool success = await _projectService.UpdateProjectAsync(selectedProject.Id, newTitle, newDescription, newStartDate, newEndDate, newStatus, newEmployeeIds);
+        // Uppdaterar projektet via ProjectService.
+        bool success = await _projectService.UpdateProjectAsync(
+            selectedProject.Id, 
+            newTitle, 
+            newDescription,
+            newStartDate, 
+            newEndDate, 
+            newStatus,
+            newEmployeeIds
+        );
+        
         Console.Clear();
-
         if (success)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine("Project updated successfully!");
+            ConsoleHelper.WriteLineColored("Project updated successfully!", ConsoleColor.Green);
         }
         else
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("Failed to update project.");
+            ConsoleHelper.WriteLineColored("Failed to update project.", ConsoleColor.Red);
         }
 
-        Console.ResetColor();
-
-        Console.WriteLine("\nPress any key to continue...");
+        ConsoleHelper.ShowExitPrompt("return to Project Menu");
         Console.ReadKey();
     }
 
 
 
 
+    // ==================================================
+    //            SELECT EMPLOYEES FOR PROJECT
+    // ==================================================
 
     /// <summary>
-    /// Retrieves user input and returns the default value if the input is empty.
+    /// Allows the user to update the assigned employees for a project.
     /// </summary>
-    private static string GetUserInput(string prompt, string defaultValue)
-    {
-        Console.Write(prompt);
-        string input = Console.ReadLine()!;
-        return string.IsNullOrWhiteSpace(input) ? defaultValue : input;
-    }
-
-
-
-    /// <summary>
-    /// Ensures the user provides a valid date input or keeps the current value.
-    /// </summary>
-    private static string GetValidDateInput(string prompt, string defaultValue)
-    {
-        while (true)
-        {
-            Console.Write(prompt);
-            string input = Console.ReadLine()!;
-            if (string.IsNullOrWhiteSpace(input)) return defaultValue;
-
-            if (DateTime.TryParseExact(input, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out _))
-                return input;
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("\nInvalid date format. Please use yyyy-MM-dd.");
-            Console.ResetColor();
-        }
-    }
-
-
-
-    /// <summary>
-    /// Displays a list of project statuses and allows the user to select one.
-    /// </summary>
-    private static ProjectStatus GetValidStatusInput(string prompt, ProjectStatus currentStatus)
-    {
-        Console.WriteLine("--------------------------------------");
-        Console.WriteLine("Available project statuses");
-        var statuses = Enum.GetValues<ProjectStatus>().Cast<ProjectStatus>().ToList();
-
-        for (int i = 0; i < statuses.Count; i++)
-        {
-            Console.WriteLine($"{i + 1}. {StatusHelper.GetFormattedStatus(statuses[i])}");
-        }
-        Console.WriteLine("--------------------------------------");
-
-        while (true)
-        {
-            Console.Write("Choose status: ");
-            string input = Console.ReadLine()!;
-
-            if (string.IsNullOrWhiteSpace(input))
-                return currentStatus;
-
-            if (int.TryParse(input, out int statusIndex) && statusIndex >= 1 && statusIndex <= statuses.Count)
-            {
-                return statuses[statusIndex - 1];
-            }
-
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine("\nInvalid selection. Please enter a valid number.");
-            Console.ResetColor();
-        }
-    }
-
-
-
-
-
-
-    /// <summary>
-    /// Prompts user to select employees for the project.
-    /// </summary>
+    /// <param name="selectedProject">The project to update employees for.</param>
     /// <returns>Returns a list of selected employee IDs.</returns>
     private async Task<List<int>> SelectEmployeesForProjectAsync(Project selectedProject)
     {
         Console.Clear();
         Console.Write("\nDo you want to update the assigned employees? (Y/N): ");
-        var input = Console.ReadLine()?.Trim().ToLower();
+        string? input = Console.ReadLine()?.Trim().ToLower();
+
+        // Om användaren inte vill ändra, returnera nuvarande anställda
         if (input != "y") return selectedProject.EmployeeIds?.ToList() ?? [];
 
-        // Hämta alla anställda
+        // Hämta alla anställda från databasen
         var employees = (await _employeeService.GetEmployeesAsync()).ToList();
+
+        // Om inga anställda finns, informera användaren och återgå
         if (employees.Count == 0)
         {
             ConsoleHelper.WriteLineColored("No employees available.", ConsoleColor.Yellow);
-            ConsoleHelper.ShowExitPrompt("return to Project Menu");
+            ConsoleHelper.ShowExitPrompt("return to the Project Menu");
             Console.ReadKey();
             return selectedProject.EmployeeIds?.ToList() ?? [];
         }
 
+        // Skapa en lista med nuvarande anställda som redan är kopplade till projektet
         var selectedEmployeeIds = selectedProject.EmployeeIds?.ToList() ?? [];
 
         while (true)
@@ -236,7 +188,7 @@ public class UpdateProjectDialog(IProjectService projectService, IEmployeeServic
             Console.WriteLine("       SELECT EMPLOYEES FOR PROJECT        ");
             Console.WriteLine("-------------------------------------------\n");
 
-            // Visa alla anställda i en lista
+            // Skriv ut alla anställda i en numrerad lista
             for (int i = 0; i < employees.Count; i++)
             {
                 var employee = employees[i];
@@ -249,22 +201,120 @@ public class UpdateProjectDialog(IProjectService projectService, IEmployeeServic
             ConsoleHelper.ShowExitPrompt("finish selecting employees");
 
             string selection = Console.ReadLine()!.Trim();
-            if (string.IsNullOrWhiteSpace(selection)) break;
 
+            // Om användaren lämnar fältet tomt, avsluta och returnera listan
             if (int.TryParse(selection, out int selectedIndex) && selectedIndex >= 1 && selectedIndex <= employees.Count)
             {
                 int selectedId = employees[selectedIndex - 1]!.Id;
+
+                // Om anställd redan är vald, ta bort den, annars lägg till den
                 if (selectedEmployeeIds.Contains(selectedId))
+                {
                     selectedEmployeeIds.Remove(selectedId);
+                    ConsoleHelper.WriteLineColored($"Removed {employees[selectedIndex - 1]!.FirstName} from project.", ConsoleColor.Yellow);
+                }
                 else
+                {
                     selectedEmployeeIds.Add(selectedId);
+                    ConsoleHelper.WriteLineColored($"Added {employees[selectedIndex - 1]!.FirstName} to project.", ConsoleColor.Green);
+                }
             }
             else
             {
-                ConsoleHelper.WriteLineColored("Invalid selection.\n", ConsoleColor.Red);
+                ConsoleHelper.WriteLineColored("Invalid selection. Please enter a valid number.\n", ConsoleColor.Red);
             }
-        }
 
-        return selectedEmployeeIds;
+            return selectedEmployeeIds;
+        }
+    }
+
+
+
+
+    // ==================================================
+    //                 HELPER METHODS
+    // ==================================================
+
+    /// <summary>
+    /// Retrieves user input and returns the default value if the input is empty.
+    /// </summary>
+    /// <param name="prompt">The prompt message displayed to the user.</param>
+    /// <param name="defaultValue">The current value to keep if the user leaves input empty.</param>
+    /// <returns>Returns the user's input or the default value if left blank.</returns>
+    private static string GetUserInput(string prompt, string defaultValue)
+    {
+        Console.Write(prompt);
+        string input = Console.ReadLine()!;
+        return string.IsNullOrWhiteSpace(input) ? defaultValue : input;
+    }
+
+
+
+    /// <summary>
+    /// Ensures the user provides a valid date input or keeps the current value.
+    /// Accepts only the "yyyy-MM-dd" format.
+    /// </summary>
+    /// <param name="prompt">The message shown to the user.</param>
+    /// <param name="defaultValue">The current date value if the user leaves input empty.</param>
+    /// <returns>Returns the new date as a string, or the default value if left blank.</returns>
+    private static string GetValidDateInput(string prompt, string defaultValue)
+    {
+        while (true)
+        {
+            Console.Write(prompt);
+            string input = Console.ReadLine()!;
+
+            // Om användaren lämnar fältet tomt, behåll nuvarande värde
+            if (string.IsNullOrWhiteSpace(input))
+                return defaultValue;
+
+            // Validera att datumet är korrekt formatterat
+            if (DateTime.TryParseExact(input, "yyyy-MM-dd", null, System.Globalization.DateTimeStyles.None, out _))
+                return input;
+
+            ConsoleHelper.WriteLineColored("\nInvalid date format. Please use yyyy-MM-dd.", ConsoleColor.Red);
+        }
+    }
+
+
+
+    /// <summary>
+    /// Displays a list of project statuses and allows the user to select one.
+    /// </summary>
+    /// <param name="prompt">The prompt message displayed to the user.</param>
+    /// <param name="currentStatus">The current status to keep if input is empty.</param>
+    /// <returns>Returns the selected project status or keeps the current status.</returns>
+    private static ProjectStatus GetValidStatusInput(string prompt, ProjectStatus currentStatus)
+    {
+        Console.WriteLine("-------------------------------------------");
+        Console.WriteLine("         AVAILABLE PROJECT STATUSES        ");
+        Console.WriteLine("-------------------------------------------");
+
+        var statuses = Enum.GetValues<ProjectStatus>().Cast<ProjectStatus>().ToList();
+
+        // Skriv ut alla tillgängliga statusalternativ
+        for (int i = 0; i < statuses.Count; i++)
+        {
+            Console.WriteLine($"{i + 1}. {StatusHelper.GetFormattedStatus(statuses[i])}");
+        }
+        Console.WriteLine("-------------------------------------------");
+
+        while (true)
+        {
+            Console.Write("Choose status: ");
+            string input = Console.ReadLine()!;
+
+            // Om användaren lämnar fältet tomt, behåll nuvarande status
+            if (string.IsNullOrWhiteSpace(input))
+                return currentStatus;
+
+            // Kontrollera att inmatningen är ett giltigt nummer i listan
+            if (int.TryParse(input, out int statusIndex) && statusIndex >= 1 && statusIndex <= statuses.Count)
+            {
+                return statuses[statusIndex - 1];
+            }
+
+            ConsoleHelper.WriteLineColored("\nInvalid selection. Please enter a valid number.", ConsoleColor.Red);
+        }
     }
 }

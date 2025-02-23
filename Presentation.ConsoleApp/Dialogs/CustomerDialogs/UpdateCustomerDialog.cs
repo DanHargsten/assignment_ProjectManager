@@ -13,7 +13,12 @@ public class UpdateCustomerDialog(ICustomerService customerService)
 {
     private readonly ICustomerService _customerService = customerService;
 
-    #region Main Execution
+
+
+    // ==================================================
+    //                   MAIN EXECUTION
+    // ==================================================
+
     /// <summary>
     /// Displays a list of customers and prompts the user to select one for updating.
     /// </summary>
@@ -28,8 +33,8 @@ public class UpdateCustomerDialog(ICustomerService customerService)
         var customers = (await _customerService.GetCustomersAsync()).ToList();
         if (customers.Count == 0)
         {
-            ConsoleHelper.WriteLineColored("No customers found. Press any key to return...", ConsoleColor.Yellow);
-            Console.ReadKey();
+            ConsoleHelper.WriteLineColored("No customers found.", ConsoleColor.Yellow);
+            ConsoleHelper.ShowExitPrompt("return to Customer Menu");
             return;
         }
 
@@ -53,27 +58,23 @@ public class UpdateCustomerDialog(ICustomerService customerService)
             {
                 var selectedCustomer = customers[selectedIndex - 1]!;
 
-                if (selectedCustomer == null)
-                {
-                    ConsoleHelper.WriteLineColored("Error: Selected customer does not exist.", ConsoleColor.Red);
-                    continue;
-                }
-
                 await PromptForCustomerUpdateAsync(selectedCustomer);
                 break;
             }
 
             ConsoleHelper.WriteLineColored("\nInvalid selection. Please enter a valid number.", ConsoleColor.Red);
-            Console.WriteLine("Press any key to try again...");
+            Console.WriteLine("Press any key to try again.");
             Console.ReadKey();
         }
     }
-    #endregion
 
 
 
 
-    #region Helper Methods
+    // ==================================================
+    //              PROMPT CUSTOMER UPDATE
+    // ==================================================
+
     /// <summary>
     /// Prompts the user for new customer details and updates the customer.
     /// </summary>
@@ -126,6 +127,13 @@ public class UpdateCustomerDialog(ICustomerService customerService)
         Console.ReadKey();
     }
 
+
+
+
+    // ==================================================
+    //                  HELPER METHODS
+    // ==================================================
+
     /// <summary>
     /// Retrieves user input and returns the default value if the input is empty.
     /// </summary>
@@ -136,6 +144,7 @@ public class UpdateCustomerDialog(ICustomerService customerService)
         return string.IsNullOrWhiteSpace(input) ? defaultValue : input;
     }
 
+
     /// <summary>
     /// Retrieves optional user input, allowing an empty value.
     /// </summary>
@@ -145,5 +154,4 @@ public class UpdateCustomerDialog(ICustomerService customerService)
         string input = Console.ReadLine()!;
         return string.IsNullOrWhiteSpace(input) ? defaultValue ?? "" : input;
     }
-    #endregion
 }

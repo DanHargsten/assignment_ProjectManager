@@ -409,4 +409,26 @@ public class ProjectService(
             return false;
         }
     }
+
+
+
+
+
+    public async Task<IEnumerable<Project>> GetProjectsByEmployeeIdAsync(int employeeId)
+    {
+        var projectEntities = await _projectEmployeeRepository.GetProjectsByEmployeeIdAsync(employeeId);
+
+        // Konvertera från Data.Entities.ProjectEntity till Business.Models.Project
+        return projectEntities.Select(pe => new Project
+        {
+            Id = pe.Id,
+            Title = pe.Title,
+            Description = pe.Description,
+            StartDate = pe.StartDate,
+            EndDate = pe.EndDate,
+            Status = pe.Status,
+            CustomerId = pe.CustomerId,
+            CreatedDate = pe.CreatedDate
+        });
+    }
 }

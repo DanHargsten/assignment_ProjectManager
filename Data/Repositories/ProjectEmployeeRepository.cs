@@ -55,4 +55,18 @@ public class ProjectEmployeeRepository(DataContext context) : BaseRepository<Pro
             .Include(pe => pe.Employee)
             .ToListAsync();
     }
+
+
+
+    // ===========================================
+    //      GET ALL PROJECTS BY EMPLOYEE ID
+    // ===========================================
+    public async Task<IEnumerable<Data.Entities.ProjectEntity>> GetProjectsByEmployeeIdAsync(int employeeId)
+    {
+        return await _context.ProjectEmployees
+            .Where(pe => pe.EmployeeId == employeeId)
+            .Include(pe => pe.Project)
+            .Select(pe => pe.Project!)
+            .ToListAsync();
+    }
 }

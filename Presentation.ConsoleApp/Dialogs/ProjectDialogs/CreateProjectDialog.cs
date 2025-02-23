@@ -79,12 +79,12 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         Console.WriteLine("-------------------------------------------");
         Console.WriteLine("          CONFIRM PROJECT CREATION         ");
         Console.WriteLine("-------------------------------------------\n");
-        Console.WriteLine($"Title: {form.Title}");
-        Console.WriteLine($"Description: {form.Description}");
-        Console.WriteLine($"Customer: {selectedCustomer.Name}");
-        Console.WriteLine($"Start Date: {form.StartDate?.ToString("yyyy-MM-dd") ?? "Not specified"}");
-        Console.WriteLine($"End Date: {form.EndDate?.ToString("yyyy-MM-dd") ?? "Not specified"}");
-        Console.WriteLine($"Status: {StatusHelper.GetFormattedStatus(form.Status)}");
+        Console.WriteLine($"Title:".PadRight(15) + $"{form.Title}");
+        Console.WriteLine($"Description:".PadRight(15) + $" {form.Description}");
+        Console.WriteLine($"Customer:".PadRight(15) + $" {selectedCustomer.Name}");
+        Console.WriteLine($"Start Date:".PadRight(15) + $" {form.StartDate?.ToString("yyyy-MM-dd") ?? "Not specified"}");
+        Console.WriteLine($"End Date:".PadRight(15) + $" {form.EndDate?.ToString("yyyy-MM-dd") ?? "Not specified"}");
+        Console.WriteLine($"Status:".PadRight(15) + $" {StatusHelper.GetFormattedStatus(form.Status)}");
 
         Console.Write("\nAre the details correct? Press Y to confirm, or Enter to cancel: ");
         var confirmation = Console.ReadLine()?.Trim().ToLower();
@@ -103,9 +103,6 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         {
             ConsoleHelper.WriteLineColored("Project creation cancelled.", ConsoleColor.Yellow);
         }
-
-        ConsoleHelper.ShowExitPrompt("continue");
-        Console.ReadKey();
 
         // Fråga om användaren vill tilldela anställda till projektet
         await AssignEmployeesToProjectAsync(form);
@@ -132,7 +129,7 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
         var employees = (await _employeeService.GetEmployeesAsync()).ToList();
         if (employees.Count == 0)
         {
-            ConsoleHelper.WriteLineColored("No employees available to assign.", ConsoleColor.Yellow);
+            ConsoleHelper.WriteLineColored("\nNo employees available to assign.", ConsoleColor.Yellow);
             ConsoleHelper.ShowExitPrompt("return to Project Menu");
             Console.ReadKey();
             return;
@@ -229,11 +226,11 @@ public class CreateProjectDialog(IProjectService projectService, ICustomerServic
                 index++;
             }
 
-            ConsoleHelper.WriteLineColored("Enter a customer number to view details, or enter '0' (or leave blank) to return to Project Menu.", ConsoleColor.Yellow);
+            ConsoleHelper.WriteLineColored("Enter a customer number to view details, Enter (leave blank) to return to Project Menu.", ConsoleColor.Yellow);
             Console.Write("> ");
             string input = Console.ReadLine()!.Trim();
 
-            if (string.IsNullOrWhiteSpace(input) || input == "0")
+            if (string.IsNullOrWhiteSpace(input))
             {
                 return null;
             }
